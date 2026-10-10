@@ -4,6 +4,7 @@ import Cover from './Cover'
 
 const DEBOUNCE_MS = 400 // wait until typing pauses before searching
 const MIN_LENGTH = 2
+const SLOW_MS = 5000 // after this, explain the wait (the free server may be waking up)
 
 export default function AlbumSearch({ onPick, disabled, excludeIds }) {
   const [query, setQuery] = useState('')
@@ -11,6 +12,7 @@ export default function AlbumSearch({ onPick, disabled, excludeIds }) {
   const [searchedFor, setSearchedFor] = useState('') // the query `results` belong to
   const [highlighted, setHighlighted] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [slow, setSlow] = useState(false)
   const [error, setError] = useState(null)
   const inputRef = useRef(null)
   const searching = query.trim().length >= MIN_LENGTH
@@ -21,9 +23,11 @@ export default function AlbumSearch({ onPick, disabled, excludeIds }) {
     // Each keystroke restarts the timer, so we only search once typing
     // pauses. MusicBrainz allows 1 request/second, so this matters.
     const controller = new AbortController()
+    let slowTimer
     const timer = setTimeout(async () => {
       setLoading(true)
       setError(null)
+      slowTimer = setTimeout(() => setSlow(true), SLOW_MS)
       try {
         const found = await searchAlbums(query, controller.signal)
         setResults(found.filter((a) => !excludeIds.includes(a.mbid)))
@@ -32,6 +36,8 @@ export default function AlbumSearch({ onPick, disabled, excludeIds }) {
       } catch (err) {
         if (err.name !== 'AbortError') setError(err.message)
       } finally {
+        clearTimeout(slowTimer)
+        setSlow(false)
         setLoading(false)
       }
     }, DEBOUNCE_MS)
@@ -39,6 +45,7 @@ export default function AlbumSearch({ onPick, disabled, excludeIds }) {
     // request in flight, so an old, slow response can't overwrite a newer one.
     return () => {
       clearTimeout(timer)
+      clearTimeout(slowTimer)
       controller.abort()
     }
   }, [query, excludeIds])
@@ -79,7 +86,11 @@ export default function AlbumSearch({ onPick, disabled, excludeIds }) {
         aria-label="Search for an album"
         autoComplete="off"
       />
-      {loading && <div className="search-status">Searching…</div>}
+      {loading && (
+        <div className="search-status">
+          {slow ? 'Still searching… the server may be waking up, which can take up to a minute.' : 'Searching…'}
+        </div>
+      )}
       {error && <div className="search-status error">{error}</div>}
       {!loading && !error && searching && searchedFor === query && shown.length === 0 && (
         <div className="search-status">No albums found. Try adding the artist name.</div>

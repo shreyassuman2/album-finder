@@ -74,7 +74,7 @@ export default function App() {
         </button>
         {loading && (
           <p className="muted small">
-            The first time for new albums this can take a minute or two while music data downloads.
+            New albums can take a minute or two while music data downloads (longer if the server was asleep).
           </p>
         )}
         {error && <p className="error">{error}</p>}

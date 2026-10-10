@@ -1,0 +1,23 @@
+# Render Blueprint: the backend API on Render's free tier.
+# Free instances sleep after 15 minutes idle and their disk is wiped on
+# restart, so the SQLite cache starts empty after each wake-up.
+services:
+  - type: web
+    name: album-finder-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:create_app --factory --host 0.0.0.0 --port $PORT
+    healthCheckPath: /docs
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      # sync: false = Render asks you for these values when you create the
+      # service, so they never appear in the repo.
+      - key: LASTFM_API_KEY
+        sync: false
+      - key: MB_USER_AGENT
+        sync: false
+      - key: FRONTEND_ORIGIN
+        sync: false
