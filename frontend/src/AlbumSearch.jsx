@@ -82,7 +82,7 @@ export default function AlbumSearch({ onPick, disabled, excludeIds }) {
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={onKeyDown}
         disabled={disabled}
-        placeholder={disabled ? 'All 5 picked' : 'Artist and album, e.g. "carti whole lotta red"'}
+        placeholder={disabled ? 'All 5 picked' : 'Artist and album, e.g. "frank ocean blonde"'}
         aria-label="Search for an album"
         autoComplete="off"
       />

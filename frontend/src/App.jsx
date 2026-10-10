@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import AlbumSearch from './AlbumSearch'
+import Background from './Background'
 import Cover from './Cover'
 import RecCard from './RecCard'
 import { getRecommendations } from './api'
@@ -41,6 +42,8 @@ export default function App() {
   const slots = Array.from({ length: SLOTS }, (_, i) => picks[i])
 
   return (
+    <>
+    <Background />
     <main>
       <header>
         <h1>Sleeper</h1>
@@ -70,7 +73,14 @@ export default function App() {
           ))}
         </ol>
         <button className="go" onClick={recommend} disabled={picks.length < SLOTS || loading}>
-          {loading ? 'Finding albums…' : 'Get recommendations'}
+          {loading ? (
+            <>
+              <span className="eq" aria-hidden="true"><i /><i /><i /><i /></span>
+              Finding albums…
+            </>
+          ) : (
+            'Get recommendations'
+          )}
         </button>
         {loading && (
           <p className="muted small">
@@ -88,8 +98,8 @@ export default function App() {
             <>
               <h2>Runners-up</h2>
               <div className="runners-up">
-                {result.runners_up.map((rec) => (
-                  <RecCard key={rec.mbid} rec={rec} />
+                {result.runners_up.map((rec, i) => (
+                  <RecCard key={rec.mbid} rec={rec} index={i + 1} />
                 ))}
               </div>
             </>
@@ -97,5 +107,6 @@ export default function App() {
         </section>
       )}
     </main>
+    </>
   )
 }

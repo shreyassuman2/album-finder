@@ -1,30 +1,33 @@
+/* Night theme: always dark, regardless of the OS light/dark setting. */
 :root {
-  --bg: #fafaf9;
-  --surface: #ffffff;
-  --text: #1c1917;
-  --muted: #78716c;
-  --border: #e7e5e4;
-  --accent: #7c3aed;
-  --accent-text: #ffffff;
-  --error: #b91c1c;
+  color-scheme: dark; /* dark scrollbars and form controls */
+  --bg: #060913;
+  /* Night sky: a little lighter navy at the top, near-black at the bottom. */
+  --sky: linear-gradient(180deg, #0d1530 0%, #070b18 55%, #04060d 100%);
+  /* Cards are slightly see-through so the LED wall glows through;
+     --surface-solid is for things that must stay readable, like the dropdown. */
+  --surface: rgb(15 21 42 / 0.9);
+  --surface-solid: #111a36;
+  --text: #f1f4ff;
+  --muted: #b0b9d6;
+  --border: rgb(170 190 255 / 0.16);
+  --accent: #8fb3ff; /* moonlight blue */
+  --accent-text: #0a1020;
+  --error: #fca5a5;
+  /* LED wall colors: deep blue, indigo, cyan, and warm "lit window" yellow
+     (Background.jsx picks the yellow less often). */
+  --led-1: #34508f;
+  --led-2: #4f539a;
+  --led-3: #3f7f93;
+  --led-4: #c9a75e;
+  --led-peak: 0.16;
+  --vinyl-opacity: 0.1;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  line-height: 1.45;
+  line-height: 1.5;
+  font-size: 17px;
   color: var(--text);
   background: var(--bg);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0c0a09;
-    --surface: #1c1917;
-    --text: #f5f5f4;
-    --muted: #a8a29e;
-    --border: #292524;
-    --accent: #a78bfa;
-    --accent-text: #1c1917;
-    --error: #f87171;
-  }
-}
-
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); }
+body { margin: 0; background: var(--bg); overflow-x: hidden; }
