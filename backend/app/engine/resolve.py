@@ -6,13 +6,22 @@ strings break on deluxe editions, remasters and duplicate titles.
 
 import re
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 
 from app.clients.musicbrainz import MusicBrainzClient
 
-# MusicBrainz search scores are 0-100. Below this, it's probably not a match.
+# MusicBrainz scores are relative: the top result is always 100, even when
+# it's a bad match. So the score only ranks results; matches_input() below is
+# what actually decides whether a result is the album the user meant.
 MIN_SCORE = 80
 # Among results within this many points of the best score, prefer studio albums.
 SCORE_WINDOW = 10
+# How alike two names must be (0-1) to count as the same. 0.75 allows small
+# typos ("Playboy Carti" vs "Playboi Carti" is 0.92) but not different names.
+MIN_NAME_SIMILARITY = 0.75
+
+# Album titles people type when the album is named after the artist.
+SELF_TITLED = {"self titled", "self-titled", "selftitled", "s/t"}
 
 LUCENE_SPECIAL = re.compile(r'[+\-&|!(){}\[\]^"~*?:\\/]')
 
@@ -31,12 +40,14 @@ def parse_input(text: str) -> tuple[str, str]:
     """'Radiohead - OK Computer' -> ('Radiohead', 'OK Computer').
 
     Splits on the first " - ", since album titles contain " - " more often
-    than artist names do.
+    than artist names do. "Artist - Self Titled" becomes ('Artist', 'Artist').
     """
     artist, sep, title = text.partition(" - ")
     artist, title = " ".join(artist.split()), " ".join(title.split())
     if not sep or not artist or not title:
         raise ValueError(f'Expected "Artist - Album", got: {text!r}')
+    if title.lower() in SELF_TITLED:
+        title = artist
     return artist, title
 
 
@@ -45,30 +56,47 @@ def _phrase(text: str) -> str:
     return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def _terms(text: str) -> str:
-    """Strip Lucene operators so text is searched as plain words."""
-    return " ".join(LUCENE_SPECIAL.sub(" ", text).split())
+def _fuzzy_terms(text: str) -> str:
+    """Strip Lucene operators and mark each word fuzzy ("word~"), so small
+    typos still match."""
+    return " ".join(word + "~" for word in LUCENE_SPECIAL.sub(" ", text).split())
+
+
+def _normalize(name: str) -> str:
+    """Lowercase and turn punctuation into spaces, for comparing names."""
+    return " ".join(re.sub(r"[^\w\s]", " ", name.lower()).split())
+
+
+def similar(a: str, b: str) -> bool:
+    # SequenceMatcher.ratio() is 1.0 for identical strings, 0.0 for nothing in common.
+    return SequenceMatcher(None, _normalize(a), _normalize(b)).ratio() >= MIN_NAME_SIMILARITY
 
 
 def resolve_album(mb: MusicBrainzClient, artist: str, title: str) -> ResolvedAlbum | None:
     # Try an exact-phrase search first; if that finds nothing good (typos,
-    # punctuation differences), fall back to a looser word-based search.
+    # punctuation differences), fall back to a fuzzy word-based search.
     queries = [f"releasegroup:{_phrase(title)} AND artist:{_phrase(artist)}"]
-    # Skip the loose search when stripping leaves nothing, e.g. Sigur Rós - ( )
-    if _terms(title) and _terms(artist):
-        queries.append(f"releasegroup:({_terms(title)}) AND artist:({_terms(artist)})")
+    # Skip the fuzzy search when stripping leaves nothing, e.g. Sigur Rós - ( )
+    if _fuzzy_terms(title) and _fuzzy_terms(artist):
+        queries.append(f"releasegroup:({_fuzzy_terms(title)}) AND artist:({_fuzzy_terms(artist)})")
     for query in queries:
-        best = pick_best(mb.search_release_groups(query))
+        best = pick_best(mb.search_release_groups(query), artist, title)
         if best is not None:
             return best
     return None
 
 
-def pick_best(results: list[dict]) -> ResolvedAlbum | None:
-    if not results:
+def matches_input(album: ResolvedAlbum, artist: str, title: str) -> bool:
+    return similar(album.artist, artist) and similar(album.title, title)
+
+
+def pick_best(results: list[dict], artist: str, title: str) -> ResolvedAlbum | None:
+    candidates = [(int(r.get("score", 0)), r) for r in results]
+    candidates = [(score, r) for score, r in candidates if matches_input(to_resolved(r), artist, title)]
+    if not candidates:
         return None
-    top_score = max(int(r.get("score", 0)) for r in results)
-    close = [r for r in results if int(r.get("score", 0)) >= max(MIN_SCORE, top_score - SCORE_WINDOW)]
+    top_score = max(score for score, _ in candidates)
+    close = [r for score, r in candidates if score >= max(MIN_SCORE, top_score - SCORE_WINDOW)]
     if not close:
         return None
 
