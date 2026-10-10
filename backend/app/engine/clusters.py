@@ -1,8 +1,6 @@
 """Clusters: what to do when the 5 inputs don't agree.
 
-Only used when the profile has no core tags. Note that "no core tags" means no
-two inputs share an exact tag, so grouping by exact tags would always give 5
-groups of one. Instead, two inputs are linked if:
+Two inputs are linked if:
   - their tags share a word ("west coast hip hop" and "hip hop" share "hip"
     and "hop"), or
   - one input's artist is on the other's similar-artists list.
@@ -10,15 +8,20 @@ Linked inputs form a group (if A links to B and B to C, all three are one
 group), and we recommend for the biggest group.
 """
 
+import re
+
 from app.engine.profile import Tags
 from app.engine.resolve import ResolvedAlbum
 
-# Words that appear in many unrelated tags and would link everything.
-GENERIC_WORDS = {"music", "and", "of", "the", "s", "new", "alternative", "indie"}
+# Words that appear in tags of unrelated genres and would link everything:
+# "dream pop" and "pop rap" share "pop" but sound nothing alike.
+GENERIC_WORDS = {"music", "and", "of", "the", "s", "new", "alternative", "indie", "pop", "rock"}
+DECADE = re.compile(r"^(19|20)?\d0s$")  # "90s", "1990s": an era, not a sound
 
 
 def _tag_words(tags: Tags) -> set[str]:
-    return {word for tag, _ in tags for word in tag.split()} - GENERIC_WORDS
+    words = {word for tag, _ in tags for word in tag.split()}
+    return {w for w in words if w not in GENERIC_WORDS and not DECADE.match(w)}
 
 
 def linked(a: int, b: int, inputs: list[ResolvedAlbum], input_tags: list[Tags], similar: list[set[str]]) -> bool:

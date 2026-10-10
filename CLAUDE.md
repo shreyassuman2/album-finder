@@ -76,7 +76,7 @@ Create files as they're needed; don't scaffold everything up front.
    `score = w1 * cosine(candidate_tags, profile_tags) + w2 * (inputs_pointing_to_it / 5) - w3 * popularity`
    Start with equal weights in one config dict so they're easy to tune. Normalize popularity (e.g. log of Last.fm listeners scaled to 0-1). Keep only the best album per artist.
 5. **Explain**: build the reason from the core tags the pick matched and the input artists that pointed to it. Template sentences only, no LLM. The reason must come from the actual score inputs.
-6. **Disagreeing inputs**: if there are no core tags, cluster the inputs by tag overlap and recommend for the largest cluster. Return which cluster was used so the UI can say so.
+6. **Disagreeing inputs**: always cluster the inputs (linked if their tags share a non-generic word, or one artist is on the other's similar-artists list). If they split into groups, recommend for the largest group. Return which group was used so the UI can say so. (Clustering only when there are no core tags missed cases like 2 rap + 2 jazz + 1 shoegaze, where rap and jazz are each "core".)
 
 Each engine step should be a plain function with clear inputs and outputs so it can be tested and run from the CLI.
 

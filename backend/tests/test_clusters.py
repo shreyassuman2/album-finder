@@ -29,3 +29,8 @@ def test_all_unrelated_gives_singletons():
 def test_cluster_note():
     assert cluster_note([album("A", "DAMN."), album("B", "Big Fish Theory")]) == \
         "Your picks didn't share one sound, so these focus on DAMN. and Big Fish Theory."
+
+
+def test_generic_words_and_decades_dont_link():
+    tags = [[("pop rap", 100), ("90s", 50)], [("dream pop", 100), ("90s", 50)], [("x", 1)], [("y", 1)], [("z", 1)]]
+    assert cluster_inputs(INPUTS, tags, [set()] * 5) == [[0], [1], [2], [3], [4]]

@@ -49,22 +49,24 @@ def recommend(
     input_tags = [album_tags(lastfm, a.artist, a.title)[0] for a in inputs]
     profile = build_profile(input_tags)
 
-    # 1b. No tag shared by 2+ inputs: recommend for the biggest group of
-    #     related inputs instead of averaging unrelated sounds together.
+    # 1b. If the inputs split into unrelated groups (say 2 rap, 2 jazz and a
+    #     shoegaze album), recommend for the biggest group instead of
+    #     averaging unrelated sounds together. Checked every time, not only
+    #     when there are no core tags: rap and jazz can each be "core" (on 2
+    #     inputs) while the 5 picks still don't agree.
     note = None
-    if not profile.core:
-        similar = [
-            {name.lower() for name, _ in lastfm.similar_artists(a.artist, limit=SIMILAR_ARTISTS_PER_INPUT)}
-            for a in inputs
-        ]
-        biggest = cluster_inputs(inputs, input_tags, similar)[0]
-        if len(biggest) == 1:
-            note = NO_OVERLAP_NOTE
-        elif len(biggest) < len(inputs):
-            inputs = [inputs[i] for i in biggest]
-            input_tags = [input_tags[i] for i in biggest]
-            profile = build_profile(input_tags)
-            note = cluster_note(inputs)
+    similar = [
+        {name.lower() for name, _ in lastfm.similar_artists(a.artist, limit=SIMILAR_ARTISTS_PER_INPUT)}
+        for a in inputs
+    ]
+    biggest = cluster_inputs(inputs, input_tags, similar)[0]
+    if len(biggest) == 1:
+        note = NO_OVERLAP_NOTE
+    elif len(biggest) < len(inputs):
+        inputs = [inputs[i] for i in biggest]
+        input_tags = [input_tags[i] for i in biggest]
+        profile = build_profile(input_tags)
+        note = cluster_note(inputs)
 
     # 2. Candidates (never any album by an artist from *any* of the inputs)
     candidates = gather_candidates(lastfm, inputs, profile, exclude=all_inputs)
