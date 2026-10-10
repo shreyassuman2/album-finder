@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { X } from '@phosphor-icons/react'
 import AlbumSearch from './AlbumSearch'
 import Cover from './Cover'
 import RecCard from './RecCard'
-import { getAlbums, getRecommendations } from './api'
+import { getAlbums, getRecommendations, wakeServer } from './api'
+import { EXAMPLES } from './examples'
 import './App.css'
 
 const SLOTS = 5
@@ -48,35 +49,37 @@ export default function App() {
     }
   }
 
-  // On first load, if the URL is a shared link, fill the slots from it and
-  // run the recommendation straight away.
+  // Fill all 5 slots from a list of IDs and recommend straight away. Used by
+  // shared links and the example-set buttons.
+  async function loadSet(ids, failMessage) {
+    setLoading(true)
+    setError(null)
+    setResult(null)
+    try {
+      const albums = await getAlbums(ids)
+      setPicks(albums)
+      await recommend(albums.map((a) => a.mbid))
+    } catch (err) {
+      setError(`${failMessage}: ${err.message}`)
+      setLoading(false)
+    }
+  }
+
+  // On page load: wake the server, and open the shared link if there is one.
+  // In development React runs effects twice on purpose; the ref makes sure we
+  // only do this once (refs survive that second run).
+  const started = useRef(false)
   useEffect(() => {
+    if (started.current) return
+    started.current = true
+    wakeServer()
     const ids = sharedIds()
     if (ids.length === 0) return
-    // In development React runs effects twice on purpose. `cancelled` makes
-    // the first run stop after its fetch, so we only recommend once.
-    let cancelled = false
-    async function openSharedLink() {
-      if (ids.length !== SLOTS) {
-        setError(`That link has ${ids.length} albums instead of ${SLOTS}. Pick your own below.`)
-        return
-      }
-      setLoading(true)
-      try {
-        const albums = await getAlbums(ids)
-        if (cancelled) return
-        setPicks(albums)
-        await recommend(albums.map((a) => a.mbid))
-      } catch (err) {
-        if (cancelled) return
-        setError(`Couldn't open that shared link: ${err.message}`)
-        setLoading(false)
-      }
+    if (ids.length !== SLOTS) {
+      setError(`That link has ${ids.length} albums instead of ${SLOTS}. Pick your own below.`)
+      return
     }
-    openSharedLink()
-    return () => {
-      cancelled = true
-    }
+    loadSet(ids, "Couldn't open that shared link")
     // Empty list: run once, on page load.
   }, [])
 
@@ -89,6 +92,14 @@ export default function App() {
         <div className="brand">Sleeper</div>
         <h1>Five albums you love.</h1>
         <p className="lede">We'll find an album you'll enjoy, plus four more worth a listen.</p>
+        <div className="examples">
+          <span className="muted small">Or try a set:</span>
+          {EXAMPLES.map((ex) => (
+            <button key={ex.name} className="example" onClick={() => loadSet(ex.ids, "Couldn't load that set")} disabled={loading}>
+              {ex.name}
+            </button>
+          ))}
+        </div>
 
         <AlbumSearch onPick={addPick} disabled={picks.length >= SLOTS} excludeIds={pickedIds} />
 

@@ -50,6 +50,10 @@ def client(monkeypatch):
         yield c
 
 
+def test_health(client):
+    assert client.get("/health").json() == {"status": "ok"}
+
+
 def test_search(client):
     assert client.get("/search?q=s").json() == []  # too short to search
     [album] = client.get("/search?q=souvlaki").json()

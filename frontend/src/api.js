@@ -26,6 +26,13 @@ export function searchAlbums(query, signal) {
   return request('/search?q=' + encodeURIComponent(query), { signal })
 }
 
+// Wakes the backend. On the free hosting tier it sleeps when idle and takes
+// up to a minute to start, so we nudge it as soon as the page opens.
+// Fire-and-forget: nobody waits on this, and a failure doesn't matter.
+export function wakeServer() {
+  fetch(API_URL + '/health').catch(() => {})
+}
+
 // Albums by ID, in the same order. Used to refill the slots from a shared link.
 export function getAlbums(albumIds) {
   return request('/albums?ids=' + albumIds.map(encodeURIComponent).join(','))

@@ -138,6 +138,12 @@ def create_app(services: Services | None = None, frontend_origins: list[str] | N
             content={"detail": f"A music data service (Last.fm or MusicBrainz) failed: {exc}. Try again in a minute."},
         )
 
+    @app.get("/health")
+    def health() -> dict:
+        """Cheap "are you up?" check. The frontend calls it on page load so a
+        sleeping free-tier server starts waking up while the visitor picks albums."""
+        return {"status": "ok"}
+
     @app.get("/search", response_model=list[Album])
     def search(request: Request, q: str = "") -> list[Album]:
         if len(q.strip()) < MIN_QUERY_LENGTH:

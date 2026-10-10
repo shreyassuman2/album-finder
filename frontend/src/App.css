@@ -17,7 +17,17 @@
 .brand { font-weight: 700; letter-spacing: -0.01em; }
 .brand::after { content: ''; display: inline-block; width: 8px; height: 8px; margin-left: 4px; background: var(--pop); }
 h1 { margin: 24px 0 0; font-size: clamp(2.25rem, 4vw, 3rem); line-height: 1.02; letter-spacing: -0.045em; font-weight: 700; }
-.lede { margin: 0 0 8px; color: var(--muted); max-width: 40ch; text-wrap: pretty; }
+.examples { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+.examples .muted { margin-right: 4px; }
+.example {
+  padding: 6px 12px; font: inherit; font-size: 0.875rem; font-weight: 600; color: var(--ink);
+  background: transparent; border: 1px solid var(--line-strong); border-radius: var(--radius); cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+.example:hover:not(:disabled) { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.example:active:not(:disabled) { transform: scale(0.97); }
+.example:disabled { opacity: 0.5; cursor: progress; }
+.lede { margin: 0 0 4px; color: var(--muted); max-width: 40ch; text-wrap: pretty; }
 
 /* Search */
 .search { position: relative; }
