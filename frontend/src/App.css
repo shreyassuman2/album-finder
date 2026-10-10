@@ -1,196 +1,173 @@
-main { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 48px 16px 64px; }
-header h1 { margin: 0 0 4px; font-size: 2.75rem; font-weight: 800; letter-spacing: -0.03em; }
+.mono { font-family: 'Geist Mono Variable', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
 .muted { color: var(--muted); }
 .small { font-size: 0.875rem; }
-.error { color: var(--error); }
+.error { color: var(--error); margin: 0; }
+
+/* Page: picker on the left, results on the right (asymmetric split).
+   Below 1024px it collapses to one column. */
+.layout {
+  display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 72px;
+  max-width: 1320px; margin: 0 auto; padding: 40px 40px 80px;
+}
+.picker {
+  position: sticky; top: 40px; align-self: start;
+  display: grid; gap: 16px;
+  animation: fade-up 0.6s var(--ease-out) both;
+}
+.brand { font-weight: 700; letter-spacing: -0.01em; }
+.brand::after { content: ''; display: inline-block; width: 8px; height: 8px; margin-left: 4px; background: var(--pop); }
+h1 { margin: 24px 0 0; font-size: clamp(2.25rem, 4vw, 3rem); line-height: 1.02; letter-spacing: -0.045em; font-weight: 700; }
+.lede { margin: 0 0 8px; color: var(--muted); max-width: 40ch; text-wrap: pretty; }
 
 /* Search */
-.picker { margin-top: 24px; display: grid; gap: 16px; }
 .search { position: relative; }
-.search-label { display: block; margin-bottom: 8px; font-size: 0.875rem; font-weight: 600; color: var(--muted); }
+.search-label { display: block; margin-bottom: 8px; font-size: 0.875rem; font-weight: 600; }
 .search input {
-  backdrop-filter: blur(12px);
-  transition: box-shadow 0.2s;
-  width: 100%; padding: 12px 14px; font: inherit; color: var(--text);
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  width: 100%; padding: 13px 14px; font: inherit; color: var(--ink);
+  background: transparent; border: 1px solid var(--line-strong); border-radius: var(--radius);
+  transition: border-color 0.2s;
 }
-.search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 15%, transparent); }
-.search-status { padding: 8px 4px 0; font-size: 0.875rem; color: var(--muted); }
+.search input::placeholder { color: var(--muted); }
+.search input:focus { outline: 2px solid var(--pop); outline-offset: -1px; border-color: transparent; }
+.search input:disabled { opacity: 0.6; }
+.search-status { padding: 8px 0 0; font-size: 0.875rem; color: var(--muted); }
 .search-status.error { color: var(--error); }
 .search-results {
   position: absolute; z-index: 10; left: 0; right: 0; top: calc(100% + 4px);
-  margin: 0; padding: 4px; list-style: none;
-  background: var(--surface-solid); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: 0 8px 24px rgb(2 4 12 / 0.5); animation: drop-in 0.15s ease-out;
+  margin: 0; padding: 4px; list-style: none; max-height: 420px; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius);
+  box-shadow: 0 16px 40px var(--shadow);
+  animation: drop-in 0.18s var(--ease-out);
 }
-.search-results li { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: var(--radius-sm); cursor: pointer; }
+.search-results li { display: flex; align-items: center; gap: 12px; padding: 6px 8px; cursor: pointer; }
+.search-results li.highlighted { background: var(--line); }
 .result-text { display: grid; min-width: 0; }
-.search-results li.highlighted { background: var(--border); }
+.result-text > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result-text .muted { font-size: 0.875rem; }
 
-/* Slots */
-.slots { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.slot {
-  display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 8px 12px;
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  backdrop-filter: blur(12px);
-}
-/* Filled slots pop in; the slight overshoot comes from the bezier going past 1. */
-.slot:not(.slot-empty) { animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-.slot-empty { border-style: dashed; background: transparent; }
+/* Slots: a numbered list split by hairlines, not boxed cards. */
+.slots-head { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.875rem; font-weight: 600; }
+.slots-head .mono { color: var(--muted); font-weight: 400; }
+.slots { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line-strong); }
+.slot { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.slot-num { width: 1.25rem; font-size: 0.8125rem; color: var(--muted); }
+.slot:not(.slot-empty) .cover { animation: slide-in 0.4s var(--ease-out) both; }
+.slot-placeholder { width: 48px; height: 48px; flex-shrink: 0; border: 1px dashed var(--line-strong); }
 .slot-text { display: grid; flex: 1; min-width: 0; }
 .slot-text > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slot-text .muted { font-size: 0.875rem; }
 .remove {
   display: inline-flex; padding: 8px; color: var(--muted);
-  background: none; border: none; border-radius: var(--radius-sm); cursor: pointer;
-  transition: transform 0.1s;
+  background: none; border: none; border-radius: var(--radius); cursor: pointer;
+  transition: color 0.15s, background 0.15s, transform 0.1s;
 }
-.remove:hover { color: var(--text); background: var(--border); }
+.remove:hover { color: var(--ink); background: var(--line); }
 .remove:active { transform: scale(0.92); }
 
 .go {
-  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  padding: 13px 16px; font: inherit; font-weight: 600; border: none; border-radius: var(--radius);
-  color: var(--accent-text); cursor: pointer;
-  background: var(--accent);
-  transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+  margin-top: 8px; padding: 15px 16px; font: inherit; font-weight: 600;
+  color: var(--pop-ink); background: var(--pop); border: none; border-radius: var(--radius); cursor: pointer;
+  transition: transform 0.15s var(--ease-out), box-shadow 0.2s, opacity 0.2s;
 }
-.go:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgb(2 4 12 / 0.55); }
-.go:not(:disabled):active { transform: translateY(1px) scale(0.98); box-shadow: none; }
-.go:disabled { opacity: 0.45; cursor: not-allowed; }
-.go:disabled:has(.eq) { opacity: 0.85; cursor: progress; } /* loading isn't "unavailable" */
-
-/* Equalizer bars on the loading button: four bars bouncing out of sync. */
-.eq { display: inline-flex; align-items: flex-end; gap: 3px; height: 14px; }
-.eq i { width: 3px; height: 100%; border-radius: 2px; background: currentColor; transform-origin: bottom; animation: eq 0.9s ease-in-out infinite alternate; }
-.eq i:nth-child(2) { animation-delay: -0.3s; }
-.eq i:nth-child(3) { animation-delay: -0.6s; }
-.eq i:nth-child(4) { animation-delay: -0.15s; }
+.go:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--ink); }
+.go:not(:disabled):active { transform: translateY(1px); box-shadow: none; }
+.go:disabled { opacity: 0.4; cursor: not-allowed; }
+.picker .small { margin: 0; }
 
 /* Covers */
-.cover { flex-shrink: 0; border-radius: var(--radius-sm); object-fit: cover; background: var(--border); }
+.cover { display: block; flex-shrink: 0; object-fit: cover; background: var(--line); border-radius: var(--radius); }
 .cover-missing { display: grid; place-items: center; color: var(--muted); }
 
+/* Right column */
+.stage { min-width: 0; padding-top: 56px; }
+
+/* Empty state: outlines of where results will land. */
+.empty-stage { display: grid; gap: 16px; animation: fade-up 0.6s 0.1s var(--ease-out) both; }
+.empty-main {
+  display: grid; place-content: center; gap: 4px; text-align: center;
+  aspect-ratio: 16 / 9; border: 1px dashed var(--line-strong);
+}
+.empty-main p { margin: 0; }
+.empty-main p:first-child { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
+.empty-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.empty-tile { aspect-ratio: 1; border: 1px dashed var(--line); }
+
 /* Results */
-.results { margin-top: 40px; display: grid; gap: 16px; }
-.results h2 { margin: 16px 0 0; font-size: 1.1rem; text-align: center; }
-.cluster-note { animation: rise 0.4s ease-out both; backdrop-filter: blur(12px); margin: 0; padding: 10px 14px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); }
-.rec {
-  display: flex; gap: 16px; padding: 14px;
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  backdrop-filter: blur(12px);
-  /* Cards rise in one after another: --i is set per card in RecCard.jsx. */
-  animation: rise 0.5s ease-out both; animation-delay: calc(var(--i, 0) * 80ms + 150ms);
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-}
-.rec:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgb(2 4 12 / 0.5); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
-.rec .cover { transition: transform 0.3s; }
-.rec:hover .cover { transform: scale(1.03); }
-.rec-main { animation-delay: 0ms; padding: 18px; }
+.results { display: grid; gap: 40px; }
+.cluster-note { margin: 0; padding-left: 12px; border-left: 3px solid var(--pop); color: var(--muted); }
 
-/* Main pick: a record slides out from behind the cover, and spins while
-   you hover the card (like it's playing). */
-.cover-wrap { position: relative; flex-shrink: 0; margin-right: 72px; }
-.cover-wrap .cover { position: relative; z-index: 1; box-shadow: 0 10px 30px rgb(2 4 12 / 0.6); }
-.rec:hover .cover-wrap .cover { transform: none; }
-.mini-vinyl {
-  position: absolute; inset: 5%; border-radius: 50%;
-  /* Layers, top first: the light streak (so you can see it turning), the
-     colored label with a hole, then fine grooves. */
-  background:
-    conic-gradient(from 0deg, transparent 0 30deg, rgb(255 255 255 / 0.14) 50deg, transparent 70deg 210deg, rgb(255 255 255 / 0.1) 230deg, transparent 250deg),
-    radial-gradient(circle, #111 0 3%, var(--accent) 3.5% 17%, transparent 17.5%),
-    repeating-radial-gradient(circle, #141414 0 1.5px, #222 1.5px 3px);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
-  /* Two animations on separate properties (translate vs rotate) so they
-     don't overwrite each other the way two "transform" animations would. */
-  animation: slide-out 0.8s 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both, spin 3s linear infinite;
-  /* The spin starts paused. Pausing/resuming instead of adding the animation
-     on hover means it picks up where it stopped and the slide-out doesn't replay. */
-  animation-play-state: running, paused;
-  transition: translate 0.4s;
+.rec-main { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: end; }
+.main-cover { overflow: hidden; }
+.main-cover .cover { width: 100%; height: auto; aspect-ratio: 1; }
+/* The cover is revealed bottom-to-top, like pulling a record from its sleeve. */
+.rec-main .main-cover { animation: reveal 0.9s var(--ease-out) both; }
+.main-body { display: grid; gap: 8px; align-content: end; }
+.main-body > * { animation: fade-up 0.6s var(--ease-out) both; }
+.main-body > :nth-child(2) { animation-delay: 0.08s; }
+.main-body > :nth-child(3) { animation-delay: 0.14s; }
+.main-body > :nth-child(4) { animation-delay: 0.2s; }
+.main-body > :nth-child(5) { animation-delay: 0.26s; }
+.rec-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pop); }
+.rec-main h3 { margin: 0; font-size: clamp(2rem, 3.5vw, 2.75rem); line-height: 1.05; letter-spacing: -0.04em; overflow-wrap: anywhere; }
+.reason { margin: 8px 0; max-width: 46ch; }
+.listen-btn {
+  display: inline-flex; align-items: center; gap: 6px; width: fit-content; margin-top: 8px;
+  padding: 11px 16px; font-weight: 600; color: var(--ink); text-decoration: none;
+  border: 1px solid var(--ink); border-radius: var(--radius);
+  transition: background 0.15s, color 0.15s, transform 0.1s;
 }
-.rec-main:hover .mini-vinyl { translate: 46% 0; animation-play-state: running, running; }
-.rec h3 { margin: 0; font-size: 1.05rem; }
-.rec-main h3 { font-size: 1.5rem; }
-.rec-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); }
-.rec-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.reason { margin: 6px 0; }
-.listen { margin-top: auto; display: inline-flex; align-items: center; gap: 4px; width: fit-content; font-weight: 600; color: var(--accent); text-decoration: none; }
-.listen svg { transition: transform 0.2s; }
+.listen-btn:hover { background: var(--ink); color: var(--bg); }
+.listen-btn:active { transform: scale(0.98); }
+
+.results h2 { margin: 0 0 -16px; padding-top: 24px; border-top: 1px solid var(--line-strong); font-size: 1rem; }
+.runners-up { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.runner { display: flex; flex-direction: column; gap: 4px; min-width: 0; animation: fade-up 0.6s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 70ms + 300ms); }
+.runner-cover { display: block; overflow: hidden; margin-bottom: 8px; }
+.runner-cover .cover { width: 100%; height: auto; aspect-ratio: 1; transition: transform 0.4s var(--ease-out); }
+.runner-cover:hover .cover { transform: scale(1.04); }
+.runner h3 { margin: 0; font-size: 1rem; line-height: 1.25; overflow-wrap: anywhere; }
+.runner .reason {
+  margin: 4px 0; color: var(--muted);
+  /* Show at most 4 lines of the reason so the row stays even. */
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+.listen { display: inline-flex; align-items: center; gap: 4px; width: fit-content; margin-top: auto; font-size: 0.875rem; font-weight: 600; color: var(--ink); text-decoration: underline; text-decoration-color: var(--pop); text-underline-offset: 4px; text-decoration-thickness: 2px; }
+.listen svg { transition: transform 0.2s var(--ease-out); }
 .listen:hover svg { transform: translate(2px, -2px); }
-/* Flex-wrap instead of grid so an odd card out (e.g. 3 runners-up) sits
-   centered on its own row rather than stuck on the left. */
-.runners-up { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
-.runners-up .rec { flex: 1 1 320px; max-width: calc(50% - 6px); }
 
-@media (max-width: 520px) {
-  .rec-main { flex-direction: column; }
-  .rec-main .cover { width: 100% !important; height: auto !important; aspect-ratio: 1; }
-  .cover-wrap { margin-right: 0; }
-  .mini-vinyl { display: none; } /* no room beside a full-width cover */
-  .rec-main .sk-cover { width: 100%; height: auto; aspect-ratio: 1; }
-  .runners-up .rec { max-width: 100%; }
-}
-
-/* Loading skeleton (ResultsSkeleton in App.jsx): grey blocks that gently pulse. */
-.skeleton { pointer-events: none; }
-.sk { background: var(--border); border-radius: var(--radius-sm); animation: sk-pulse 1.4s ease-in-out infinite; }
-.sk-cover { flex-shrink: 0; width: 120px; height: 120px; }
-.rec-main .sk-cover { width: 220px; height: 220px; }
-.sk-lines { flex: 1; display: grid; gap: 10px; align-content: start; padding-top: 4px; }
-.sk-title { height: 22px; width: 60%; }
+/* Loading skeleton */
+.sk { background: var(--line); animation: pulse 1.4s ease-in-out infinite; }
+.sk-square { width: 100%; aspect-ratio: 1; }
+.sk-lines { display: grid; gap: 12px; align-content: end; }
+.sk-title { height: 40px; width: 80%; }
 .sk-line { height: 14px; }
-.w40 { width: 40%; } .w70 { width: 70%; } .w90 { width: 90%; }
+.runner .sk-line { margin-top: 6px; }
+.w30 { width: 30%; } .w40 { width: 40%; } .w70 { width: 70%; } .w90 { width: 90%; }
 
-/* Intro: header and picker fade up on page load. */
-header { animation: rise 0.6s ease-out both; }
-.picker { animation: rise 0.6s 0.1s ease-out both; }
-
-/* Background layer (Background.jsx) */
-.bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: var(--sky); }
-.leds {
-  display: grid; gap: 6px; padding: 3px;
-  /* Fade the wall out toward the middle so it frames the content instead of
-     sitting behind the text. Black in a mask = visible, transparent = hidden. */
-  mask-image: radial-gradient(ellipse at center, transparent 25%, rgb(0 0 0 / 0.7) 85%);
+/* Tablet and down: one column, picker no longer sticky. */
+@media (max-width: 1023px) {
+  .layout { grid-template-columns: 1fr; gap: 48px; padding: 32px 24px 64px; }
+  .picker { position: static; }
+  .stage { padding-top: 0; }
+  .empty-stage { display: none; } /* the picker already explains what to do */
+  .runners-up { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-.led {
-  aspect-ratio: 1; border-radius: var(--radius-sm); opacity: 0.03;
-  animation-name: led; animation-timing-function: ease-in-out; animation-iteration-count: infinite;
-}
-.vinyl {
-  position: absolute; width: min(80vmin, 640px); right: max(-22vmin, -180px); bottom: max(-22vmin, -180px);
-  opacity: var(--vinyl-opacity); animation: spin 30s linear infinite;
-}
-.vinyl-disc { fill: #0a0a0a; }
-.vinyl-groove { fill: none; stroke: #fff; stroke-opacity: 0.1; stroke-width: 0.6; }
-.vinyl-shine { fill: #fff; opacity: 0.12; }
-.vinyl-label { fill: var(--accent); }
-.vinyl-hole { fill: var(--bg); }
-
-@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
-@keyframes pop { from { opacity: 0; transform: scale(0.94); } }
-@keyframes drop-in { from { opacity: 0; transform: translateY(-4px); } }
-@keyframes spin { to { rotate: 360deg; } }
-@keyframes slide-out { from { translate: 0 0; } to { translate: 38% 0; } }
-@keyframes sk-pulse { 50% { opacity: 0.45; } }
-@keyframes eq { from { transform: scaleY(0.25); } to { transform: scaleY(1); } }
-/* Each box sits dim most of the cycle, then briefly glows and fades. Every box
-   has its own random duration and delay (Background.jsx), so they're out of sync. */
-@keyframes led {
-  0%, 70%, 100% { opacity: 0.03; }
-  85% { opacity: var(--led-peak); }
+/* Phones: stack the main pick, runners-up become rows (cover left, text right). */
+@media (max-width: 640px) {
+  .layout { padding: 24px 16px 56px; }
+  .rec-main { grid-template-columns: 1fr; gap: 20px; }
+  .runners-up { grid-template-columns: 1fr; gap: 20px; }
+  .runner { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 16px; align-content: start; }
+  .runner > :not(.runner-cover):not(.sk-square) { grid-column: 2; }
+  .runner-cover, .runner .sk-square { grid-row: 1 / span 4; margin-bottom: 0; }
 }
 
-/* Respect the OS "reduce motion" setting: no animations, but put the
-   main pick's record in its slid-out spot so the layout still looks right. */
+@keyframes fade-up { from { opacity: 0; transform: translateY(16px); } }
+@keyframes slide-in { from { opacity: 0; transform: translateX(-12px); } }
+@keyframes drop-in { from { opacity: 0; transform: translateY(-6px); } }
+@keyframes reveal { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes pulse { 50% { opacity: 0.45; } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  .mini-vinyl { translate: 38% 0; }
-}
-
-/* People who turn on "reduce transparency" get solid cards with no blur. */
-@media (prefers-reduced-transparency: reduce) {
-  :root { --surface: var(--surface-solid); }
-  .search input, .slot, .rec, .cluster-note { backdrop-filter: none; }
 }

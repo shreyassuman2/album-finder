@@ -1,38 +1,39 @@
-/* Night theme: always dark, regardless of the OS light/dark setting. */
+/* Record-sleeve theme: monochrome with one signal-orange accent.
+   Follows the OS light/dark setting. */
 :root {
-  color-scheme: dark; /* dark scrollbars and form controls */
-  --bg: #060913;
-  /* Night sky: a little lighter navy at the top, near-black at the bottom. */
-  --sky: linear-gradient(180deg, #0d1530 0%, #070b18 55%, #04060d 100%);
-  /* Cards are slightly see-through so the LED wall glows through;
-     --surface-solid is for things that must stay readable, like the dropdown. */
-  --surface: rgb(15 21 42 / 0.9);
-  --surface-solid: #111a36;
-  --text: #f1f4ff;
-  --muted: #b0b9d6;
-  --border: rgb(170 190 255 / 0.16);
-  --accent: #8fb3ff; /* moonlight blue */
-  --accent-text: #0a1020;
-  --error: #fca5a5;
-  /* LED wall colors: deep blue, indigo, cyan, and warm "lit window" yellow
-     (Background.jsx picks the yellow less often). */
-  --led-1: #34508f;
-  --led-2: #4f539a;
-  --led-3: #3f7f93;
-  --led-4: #c9a75e;
-  --led-peak: 0.16;
-  /* Corner radius rule: containers (inputs, buttons, slots, cards, dropdown)
-     use --radius; things inside them (covers, list rows, icon buttons, LED
-     boxes, skeleton bars) use --radius-sm. */
-  --radius: 12px;
-  --radius-sm: 8px;
-  --vinyl-opacity: 0.1;
+  --bg: #efefed;
+  --surface: #fafaf9; /* dropdown, so it sits above the page */
+  --ink: #141414;
+  --muted: #5c5c59;
+  --line: rgb(20 20 20 / 0.14);
+  --line-strong: rgb(20 20 20 / 0.32);
+  --pop: #ff4f1f;
+  --pop-ink: #141414; /* text on the orange */
+  --error: #b42318;
+  --shadow: rgb(20 20 20 / 0.12);
+  /* Shape rule: everything is square-cornered, like a record sleeve. */
+  --radius: 0;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   font-family: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 16px;
   line-height: 1.5;
-  font-size: 17px;
-  color: var(--text);
+  color: var(--ink);
   background: var(--bg);
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111110;
+    --surface: #1c1c1b;
+    --ink: #ededeb;
+    --muted: #a3a3a0;
+    --line: rgb(237 237 235 / 0.13);
+    --line-strong: rgb(237 237 235 / 0.3);
+    --pop: #ff6a3d;
+    --error: #ff8a80;
+    --shadow: rgb(0 0 0 / 0.4);
+  }
+}
+
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); overflow-x: hidden; }
+body { margin: 0; background: var(--bg); }
