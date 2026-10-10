@@ -184,6 +184,38 @@ h1 { margin: 24px 0 0; font-size: clamp(2.25rem, 4vw, 3rem); line-height: 1.02; 
 .steps h3 { margin: 0 0 4px; font-size: 1rem; }
 .steps p { color: var(--muted); }
 
+/* About: "5 in, 1 out" diagram. Input covers fan in one by one, then the pick reveals. */
+.demo { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 0.42fr); align-items: center; gap: 20px; }
+.demo-inputs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.demo-in { animation: fade-up 0.5s var(--ease-out) both; animation-delay: calc(var(--i) * 80ms + 200ms); }
+.demo .cover { width: 100%; height: auto; aspect-ratio: 1; }
+.demo-arrow { color: var(--pop); animation: fade-up 0.5s 0.65s var(--ease-out) both; }
+.demo-out { overflow: hidden; box-shadow: 0 0 0 3px var(--pop); animation: reveal 0.9s 0.8s var(--ease-out) both; }
+.demo figcaption { grid-column: 1 / -1; }
+
+/* About: API example and endpoint list. */
+.code {
+  margin: 0; padding: 16px 18px; overflow-x: auto;
+  font: 0.8125rem/1.6 'Geist Mono Variable', ui-monospace, monospace;
+  color: var(--ink); background: var(--surface); border: 1px solid var(--line-strong); border-left: 3px solid var(--pop);
+}
+.code code { white-space: pre; }
+.code-method { color: var(--pop); font-weight: 700; }
+.code-comment { color: var(--muted); }
+.endpoints { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.endpoints li { display: grid; grid-template-columns: 3.5rem minmax(9rem, auto) minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 0.875rem; }
+.endpoint-method { color: var(--pop); font-weight: 600; }
+.api-link { color: var(--ink); width: fit-content; }
+.stack { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+.stack li { padding: 6px 12px; font-size: 0.8125rem; border: 1px solid var(--line-strong); transition: border-color 0.15s, color 0.15s; }
+.stack li:hover { border-color: var(--pop); color: var(--pop); }
+
+/* Sections fade up as they scroll into view, in browsers that support
+   scroll-driven animations. Others just show them normally. */
+@supports (animation-timeline: view()) {
+  .about section { animation: fade-up linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; }
+}
+
 /* Tablet and down: one column, picker no longer sticky. */
 @media (max-width: 1023px) {
   .layout { grid-template-columns: 1fr; gap: 48px; padding: 32px 24px 64px; }
@@ -196,6 +228,11 @@ h1 { margin: 24px 0 0; font-size: clamp(2.25rem, 4vw, 3rem); line-height: 1.02; 
 @media (max-width: 640px) {
   .layout { padding: 24px 16px 56px; }
   .about { padding: 24px 16px 56px; }
+  .demo { grid-template-columns: 1fr; justify-items: center; }
+  .demo-arrow { rotate: 90deg; }
+  .demo-out { width: 45%; }
+  .endpoints li { grid-template-columns: 3rem minmax(0, 1fr); }
+  .endpoints li .muted { grid-column: 2; }
   .rec-main { grid-template-columns: 1fr; gap: 20px; }
   .runners-up { grid-template-columns: 1fr; gap: 20px; }
   .runner { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 16px; align-content: start; }
