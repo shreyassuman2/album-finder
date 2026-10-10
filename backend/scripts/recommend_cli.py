@@ -91,6 +91,8 @@ def run(args, inputs: list[tuple[str, str]], mb: MusicBrainzClient, lastfm: Last
     core = ", ".join(f"{t} ({result.profile.weights[t]})" for t in result.profile.core) or "(none: your picks share no tags)"
     print(f"\nCore tags (number of your albums carrying each): {core}")
     print(f"Scored {result.candidate_count} candidate albums.\n")
+    if result.cluster_note:
+        print(f"Note: {result.cluster_note}\n")
 
     for i, rec in enumerate(result.recommendations):
         s = rec.scored

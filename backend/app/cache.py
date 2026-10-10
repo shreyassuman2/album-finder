@@ -7,6 +7,7 @@ fast, polite to the APIs, and lets the engine be re-run without re-downloading.
 
 import json
 import sqlite3
+import threading
 import time
 from pathlib import Path
 from typing import Any, Callable
@@ -34,7 +35,11 @@ def make_key(endpoint: str, params: dict) -> str:
 
 class Cache:
     def __init__(self, path: Path | str):
-        self.conn = sqlite3.connect(str(path))
+        # FastAPI handles requests on several threads. SQLite connections refuse
+        # cross-thread use by default, so we allow it and use a lock to make
+        # sure only one thread touches the connection at a time.
+        self.conn = sqlite3.connect(str(path), check_same_thread=False)
+        self.lock = threading.Lock()
         self.conn.execute(
             "CREATE TABLE IF NOT EXISTS responses ("
             " key TEXT PRIMARY KEY,"
@@ -45,7 +50,8 @@ class Cache:
         self.conn.commit()
 
     def get(self, key: str, max_age: float = DEFAULT_MAX_AGE_SECONDS) -> Any | None:
-        row = self.conn.execute("SELECT body, fetched_at FROM responses WHERE key = ?", (key,)).fetchone()
+        with self.lock:
+            row = self.conn.execute("SELECT body, fetched_at FROM responses WHERE key = ?", (key,)).fetchone()
         if row is None:
             return None
         body, fetched_at = row
@@ -54,11 +60,12 @@ class Cache:
         return json.loads(body)
 
     def set(self, key: str, data: Any) -> None:
-        self.conn.execute(
-            "INSERT OR REPLACE INTO responses (key, body, fetched_at) VALUES (?, ?, ?)",
-            (key, json.dumps(data), time.time()),
-        )
-        self.conn.commit()
+        with self.lock:
+            self.conn.execute(
+                "INSERT OR REPLACE INTO responses (key, body, fetched_at) VALUES (?, ?, ?)",
+                (key, json.dumps(data), time.time()),
+            )
+            self.conn.commit()
 
     def close(self) -> None:
         self.conn.close()

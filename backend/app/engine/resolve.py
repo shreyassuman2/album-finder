@@ -123,3 +123,32 @@ def to_resolved(r: dict) -> ResolvedAlbum:
         primary_type=r.get("primary-type"),
         secondary_types=list(r.get("secondary-types") or []),
     )
+
+
+# Album types people pick as inputs. Mixtapes are allowed; live albums,
+# compilations and remixes aren't (they'd skew the tag profile).
+SEARCH_EXCLUDED_TYPES = "compilation OR live OR remix OR dj-mix"
+SEARCH_LIMIT = 8
+
+
+def search_albums(mb: MusicBrainzClient, text: str) -> list[ResolvedAlbum]:
+    """Autocomplete: albums matching free text like "carti whole lotta" or just
+    "jane remover".
+
+    The plain words search titles and artist names; the quoted artist:"..."^4
+    part boosts albums whose artist name is exactly what was typed, so an
+    artist name alone lists that artist's albums first.
+    """
+    words = " ".join(LUCENE_SPECIAL.sub(" ", text).split())
+    if not words:
+        return []
+    query = (
+        f'({words} OR artist:"{words}"^4) AND primarytype:album'
+        f" AND NOT secondarytype:({SEARCH_EXCLUDED_TYPES})"
+    )
+    return [to_resolved(r) for r in mb.search_release_groups(query, limit=SEARCH_LIMIT)]
+
+
+def album_by_id(mb: MusicBrainzClient, mbid: str) -> ResolvedAlbum | None:
+    data = mb.lookup_release_group(mbid)
+    return to_resolved(data) if data else None

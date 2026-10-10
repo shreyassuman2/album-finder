@@ -47,8 +47,12 @@ def _norm(name: str) -> str:
     return " ".join(name.lower().split())
 
 
-def gather_candidates(lastfm: LastFmClient, inputs: list[ResolvedAlbum], profile: Profile) -> list[Candidate]:
-    input_artists = {_norm(a.artist) for a in inputs}
+def gather_candidates(
+    lastfm: LastFmClient, inputs: list[ResolvedAlbum], profile: Profile, exclude: list[ResolvedAlbum] | None = None
+) -> list[Candidate]:
+    """`inputs` seed the similar-artist search; artists in `exclude` (default:
+    the inputs) are never candidates."""
+    input_artists = {_norm(a.artist) for a in (exclude or inputs)}
     found: dict[tuple[str, str], Candidate] = {}  # keyed by normalized (artist, title) to merge duplicates
 
     def add(artist: str, title: str) -> Candidate | None:

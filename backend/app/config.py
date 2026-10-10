@@ -14,6 +14,7 @@ class Settings:
     lastfm_api_key: str
     mb_user_agent: str
     cache_path: Path
+    frontend_origins: list[str]  # sites allowed to call the API from a browser (CORS)
 
 
 def load_settings() -> Settings:
@@ -33,4 +34,6 @@ def load_settings() -> Settings:
         lastfm_api_key=os.environ["LASTFM_API_KEY"],
         mb_user_agent=os.environ["MB_USER_AGENT"],
         cache_path=cache_path,
+        # Comma-separated, e.g. "http://localhost:5173,https://album-finder.vercel.app"
+        frontend_origins=os.environ.get("FRONTEND_ORIGIN", "http://localhost:5173").split(","),
     )
