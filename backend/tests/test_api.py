@@ -57,6 +57,25 @@ def test_search(client):
     assert album["cover_url"].startswith("https://coverartarchive.org/release-group/")
 
 
+def test_albums_lookup_keeps_order(client):
+    found = client.get(f"/albums?ids={mbid(3)},{mbid(1)}").json()
+    assert [a["title"] for a in found] == ["Album 3", "Album 1"]
+    assert found[0]["mbid"] == mbid(3) and found[0]["cover_url"].endswith(mbid(3) + "/front-250")
+
+
+@pytest.mark.parametrize("ids, status, message", [
+    ("", 400, "between 1 and 5"),
+    (",".join(mbid(i) for i in range(1, 7)), 400, "between 1 and 5"),
+    ("not-an-id", 400, "Not a valid MusicBrainz ID"),
+    (f"{mbid(1)},{mbid(1)}", 400, "more than once"),
+    (f"{mbid(1)},{mbid(99)}", 404, "Unknown album ID"),
+])
+def test_albums_lookup_errors(client, ids, status, message):
+    response = client.get(f"/albums?ids={ids}")
+    assert response.status_code == status
+    assert message in response.json()["detail"]
+
+
 def test_recommend_success(client):
     body = client.post("/recommend", json={"album_ids": [mbid(i) for i in range(1, 6)]}).json()
     assert body["main"]["title"] == "Rec 0"

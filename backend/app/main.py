@@ -1,4 +1,5 @@
-"""FastAPI app: GET /search for autocomplete, POST /recommend for results.
+"""FastAPI app: GET /search for autocomplete, GET /albums to look albums up by
+ID (for shared links), POST /recommend for results.
 
 Run (from backend/):
     .venv/bin/uvicorn app.main:create_app --factory --reload
@@ -65,6 +66,27 @@ def to_album(a: ResolvedAlbum) -> Album:
     return Album(mbid=a.mbid, title=a.title, artist=a.artist, year=a.year, cover_url=cover_url(a.mbid))
 
 
+def clean_ids(raw: list[str]) -> list[str]:
+    """Lowercase/strip IDs and reject duplicates or anything that isn't a
+    MusicBrainz ID shape (400). Shared by /albums and /recommend."""
+    ids = [i.strip().lower() for i in raw]
+    if len(set(ids)) != len(ids):
+        raise HTTPException(400, "The same album was picked more than once.")
+    malformed = [i for i in ids if not MBID_PATTERN.match(i)]
+    if malformed:
+        raise HTTPException(400, f"Not a valid MusicBrainz ID: {', '.join(malformed)}")
+    return ids
+
+
+def look_up(mb: MusicBrainzClient, ids: list[str]) -> list[ResolvedAlbum]:
+    """Fetch each album (cached), or 404 naming the IDs MusicBrainz doesn't know."""
+    albums = [album_by_id(mb, i) for i in ids]
+    unknown = [i for i, a in zip(ids, albums) if a is None]
+    if unknown:
+        raise HTTPException(404, f"Unknown album ID(s): {', '.join(unknown)}")
+    return albums
+
+
 def listen_url(a: ResolvedAlbum) -> str:
     # A YouTube *search*, not a specific video: plays without any login, and
     # we never need a Spotify/YouTube API.
@@ -122,23 +144,21 @@ def create_app(services: Services | None = None, frontend_origins: list[str] | N
             return []
         return [to_album(a) for a in search_albums(request.app.state.services.mb, q)]
 
+    @app.get("/albums", response_model=list[Album])
+    def albums(request: Request, ids: str = "") -> list[Album]:
+        """Look up to 5 albums by comma-separated ID, in the order given. The
+        frontend uses this to refill the 5 slots when someone opens a shared link."""
+        raw = [i for i in ids.split(",") if i.strip()]
+        if not 1 <= len(raw) <= INPUT_COUNT:
+            raise HTTPException(400, f"Pass between 1 and {INPUT_COUNT} album IDs (got {len(raw)}).")
+        return [to_album(a) for a in look_up(request.app.state.services.mb, clean_ids(raw))]
+
     @app.post("/recommend", response_model=RecommendResponse)
     def recommend_albums(request: Request, body: RecommendRequest) -> RecommendResponse:
         s: Services = request.app.state.services
-        ids = [i.strip().lower() for i in body.album_ids]
-
-        if len(ids) != INPUT_COUNT:
-            raise HTTPException(400, f"Pick exactly {INPUT_COUNT} albums (got {len(ids)}).")
-        if len(set(ids)) != len(ids):
-            raise HTTPException(400, "The same album was picked more than once.")
-        malformed = [i for i in ids if not MBID_PATTERN.match(i)]
-        if malformed:
-            raise HTTPException(400, f"Not a valid MusicBrainz ID: {', '.join(malformed)}")
-
-        albums = [album_by_id(s.mb, i) for i in ids]
-        unknown = [i for i, a in zip(ids, albums) if a is None]
-        if unknown:
-            raise HTTPException(404, f"Unknown album ID(s): {', '.join(unknown)}")
+        if len(body.album_ids) != INPUT_COUNT:
+            raise HTTPException(400, f"Pick exactly {INPUT_COUNT} albums (got {len(body.album_ids)}).")
+        albums = look_up(s.mb, clean_ids(body.album_ids))
 
         result = recommend(s.lastfm, s.mb, albums, n=INPUT_COUNT)
         if not result.recommendations:

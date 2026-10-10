@@ -26,6 +26,11 @@ export function searchAlbums(query, signal) {
   return request('/search?q=' + encodeURIComponent(query), { signal })
 }
 
+// Albums by ID, in the same order. Used to refill the slots from a shared link.
+export function getAlbums(albumIds) {
+  return request('/albums?ids=' + albumIds.map(encodeURIComponent).join(','))
+}
+
 export function getRecommendations(albumIds) {
   return request('/recommend', {
     method: 'POST',

@@ -110,8 +110,15 @@ h1 { margin: 24px 0 0; font-size: clamp(2.25rem, 4vw, 3rem); line-height: 1.02; 
 .rec-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pop); }
 .rec-main h3 { margin: 0; font-size: clamp(2rem, 3.5vw, 2.75rem); line-height: 1.05; letter-spacing: -0.04em; overflow-wrap: anywhere; }
 .reason { margin: 8px 0; max-width: 46ch; }
+.main-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin-top: 8px; }
+.copy-link {
+  display: inline-flex; align-items: center; gap: 6px; padding: 11px 0;
+  font: inherit; font-weight: 600; color: var(--muted); background: none; border: none; cursor: pointer;
+  transition: color 0.15s;
+}
+.copy-link:hover { color: var(--ink); }
 .listen-btn {
-  display: inline-flex; align-items: center; gap: 6px; width: fit-content; margin-top: 8px;
+  display: inline-flex; align-items: center; gap: 6px; width: fit-content;
   padding: 11px 16px; font-weight: 600; color: var(--ink); text-decoration: none;
   border: 1px solid var(--ink); border-radius: var(--radius);
   transition: background 0.15s, color 0.15s, transform 0.1s;

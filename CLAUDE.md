@@ -29,7 +29,7 @@ album-finder/
   backend/
     requirements.txt
     app/
-      main.py             # FastAPI app: GET /search, POST /recommend
+      main.py             # FastAPI app: GET /search, GET /albums, POST /recommend
       config.py           # reads env vars
       cache.py            # SQLite response cache
       clients/
@@ -98,6 +98,7 @@ Don't start the frontend until the engine works from the CLI.
 ## API contract
 
 - `GET /search?q=...` -> list of `{ mbid, title, artist, year, cover_url }` for autocomplete.
+- `GET /albums?ids=id1,id2,...` (1-5 IDs) -> the same album shape, in the order given. Used to refill the slots from a shared link (`/?albums=id1,...,id5`).
 - `POST /recommend` with `{ "album_ids": [5 MusicBrainz release-group IDs] }` -> `{ "main": Rec, "runners_up": [Rec x4], "cluster_note": str | null }` where `Rec = { mbid, title, artist, year, cover_url, reason, listen_url, score }`.
 - Return clear errors for: fewer than 5 IDs, unknown IDs, upstream API failure.
 

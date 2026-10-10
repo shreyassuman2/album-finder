@@ -1,4 +1,5 @@
-import { ArrowUpRight } from '@phosphor-icons/react'
+import { useState } from 'react'
+import { ArrowUpRight, Check, LinkSimple } from '@phosphor-icons/react'
 import Cover from './Cover'
 
 // "shares the rage of your picks" -> "Shares the rage of your picks"
@@ -20,9 +21,12 @@ export default function RecCard({ rec, main, index = 0 }) {
           <h3>{rec.title}</h3>
           <div className="muted">{meta}</div>
           <p className="reason">{capitalize(rec.reason)}.</p>
-          <a className="listen-btn" href={rec.listen_url} target="_blank" rel="noreferrer">
-            Listen <ArrowUpRight size={16} weight="bold" aria-hidden="true" />
-          </a>
+          <div className="main-actions">
+            <a className="listen-btn" href={rec.listen_url} target="_blank" rel="noreferrer">
+              Listen <ArrowUpRight size={16} weight="bold" aria-hidden="true" />
+            </a>
+            <CopyLink />
+          </div>
         </div>
       </article>
     )
@@ -40,5 +44,29 @@ export default function RecCard({ rec, main, index = 0 }) {
         Listen <ArrowUpRight size={14} weight="bold" aria-hidden="true" />
       </a>
     </article>
+  )
+}
+
+// Copies the current page address (which holds the 5 picks) to the clipboard.
+// The label flips to "Link copied" for 2 seconds as feedback.
+function CopyLink() {
+  const [status, setStatus] = useState('idle') // 'idle' | 'copied' | 'failed'
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setStatus('copied')
+    } catch {
+      // Clipboard access can be blocked (old browsers, some privacy settings).
+      setStatus('failed')
+    }
+    setTimeout(() => setStatus('idle'), 2000)
+  }
+
+  return (
+    <button className="copy-link" onClick={copy} aria-live="polite">
+      {status === 'copied' ? <Check size={16} weight="bold" aria-hidden="true" /> : <LinkSimple size={16} weight="bold" aria-hidden="true" />}
+      {status === 'copied' ? 'Link copied' : status === 'failed' ? 'Copy the address bar instead' : 'Copy link'}
+    </button>
   )
 }

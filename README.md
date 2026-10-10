@@ -96,6 +96,7 @@ In development, Vite forwards `/api/...` to the backend, so no extra setup is ne
 ## API
 
 - `GET /search?q=carti whole lotta` returns up to 8 `{ mbid, title, artist, year, cover_url }`. Search works best with the artist plus the album, or the artist alone.
+- `GET /albums?ids=id1,id2,...` (1 to 5 IDs) returns those albums in the same shape, in order. The frontend uses it to open shared links like `/?albums=id1,...,id5`.
 - `POST /recommend` with `{ "album_ids": [5 MusicBrainz release-group IDs] }` returns `{ main, runners_up[4], cluster_note }`. Each recommendation has `mbid, title, artist, year, cover_url, reason, listen_url, score`.
 - Errors: `400` for anything other than 5 distinct valid IDs, `404` for unknown IDs, `502` when Last.fm or MusicBrainz fails.
 
