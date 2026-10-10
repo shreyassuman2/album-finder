@@ -59,17 +59,42 @@ def popularity(listeners: int) -> float:
     return min(1.0, math.log10(listeners + 1) / MAX_LOG_LISTENERS)
 
 
-def score_candidate(c: Candidate, profile: Profile, n_inputs: int, weights: dict = WEIGHTS) -> Scored:
+def score_candidate(
+    c: Candidate, profile: Profile, n_inputs: int, weights: dict = WEIGHTS, listeners: int | None = None
+) -> Scored:
+    """`listeners` overrides the album's own count (rank() passes the artist's)."""
     similarity = cosine(dict(c.tags), profile.weights)
     pointers = len(c.pointed_by) / n_inputs
-    pop = popularity(c.listeners)
+    pop = popularity(c.listeners if listeners is None else listeners)
     total = weights["similarity"] * similarity + weights["pointers"] * pointers - weights["popularity"] * pop
     return Scored(candidate=c, similarity=similarity, pointers=pointers, popularity=pop, score=total)
 
 
 def rank(candidates: list[Candidate], profile: Profile, n_inputs: int, weights: dict = WEIGHTS) -> list[Scored]:
-    scored = [score_candidate(c, profile, n_inputs, weights) for c in candidates]
-    return sorted(scored, key=lambda s: s.score, reverse=True)
+    """Order candidates so select_top can walk them top-down.
+
+    Popularity is judged per artist (by their most-played album), so it
+    decides *which artists* we suggest, not which of an artist's albums.
+    Artists are ordered by their best album's score; within an artist, their
+    most-listened album comes first, since that's the natural place to start
+    with an artist you don't know yet.
+    """
+    artist_listeners: dict[str, int] = {}
+    for c in candidates:
+        key = c.artist.lower()
+        artist_listeners[key] = max(artist_listeners.get(key, 0), c.listeners)
+
+    scored = [
+        score_candidate(c, profile, n_inputs, weights, listeners=artist_listeners[c.artist.lower()])
+        for c in candidates
+    ]
+
+    artist_best: dict[str, float] = {}
+    for s in scored:
+        key = s.candidate.artist.lower()
+        artist_best[key] = max(artist_best.get(key, -math.inf), s.score)
+
+    return sorted(scored, key=lambda s: (artist_best[s.candidate.artist.lower()], s.candidate.listeners), reverse=True)
 
 
 def select_top(

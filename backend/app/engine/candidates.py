@@ -17,7 +17,7 @@ from app.engine.profile import Profile, Tags, album_tags
 from app.engine.resolve import ResolvedAlbum
 
 SIMILAR_ARTISTS_PER_INPUT = 10
-ALBUMS_PER_SIMILAR_ARTIST = 2
+ALBUMS_PER_SIMILAR_ARTIST = 5
 TAGS_USED = 3  # spec says 2-3 strongest core tags
 ALBUMS_PER_TAG = 20
 
@@ -60,12 +60,14 @@ def gather_candidates(lastfm: LastFmClient, inputs: list[ResolvedAlbum], profile
             found[key] = Candidate(artist=artist, title=title)
         return found[key]
 
+    # Which input artists list each artist as similar. Tracked per artist, so a
+    # similar artist's album still gets credit if it came in via the tag search.
+    pointers: dict[str, set[str]] = {}
     for album in inputs:
         for similar_artist, _match in lastfm.similar_artists(album.artist, limit=SIMILAR_ARTISTS_PER_INPUT):
+            pointers.setdefault(_norm(similar_artist), set()).add(album.artist)
             for title in lastfm.artist_top_albums(similar_artist, limit=ALBUMS_PER_SIMILAR_ARTIST):
-                candidate = add(similar_artist, title)
-                if candidate:
-                    candidate.pointed_by.add(album.artist)
+                add(similar_artist, title)
 
     for tag in profile.strongest(TAGS_USED):
         for artist, title in lastfm.tag_top_albums(tag, limit=ALBUMS_PER_TAG):
@@ -73,6 +75,8 @@ def gather_candidates(lastfm: LastFmClient, inputs: list[ResolvedAlbum], profile
             if candidate:
                 candidate.from_tags.add(tag)
 
+    for c in found.values():
+        c.pointed_by = pointers.get(_norm(c.artist), set())
     return list(found.values())
 
 

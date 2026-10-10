@@ -23,17 +23,21 @@ EXACT_YEAR = re.compile(r"\b(19|20)\d\d\b")
 Tags = list[tuple[str, int]]  # [(tag, count 0-100)], strongest first
 
 
+def _normalize_tag(name: str) -> str:
+    return " ".join(name.lower().replace("-", " ").split())
+
+
 def clean_tags(raw: Tags, artist_name: str = "") -> Tags:
-    """Lowercase, collapse whitespace, drop stop tags / weak tags / exact years /
-    the artist's own name, and merge duplicates. Returns [(tag, count)]
-    strongest first."""
-    artist_tag = " ".join(artist_name.lower().split())
+    """Lowercase, treat hyphens as spaces ("hip-hop" = "hip hop"), drop stop
+    tags / weak tags / bare numbers / exact years / the artist's own name, and
+    merge duplicates. Returns [(tag, count)] strongest first."""
+    artist_tag = _normalize_tag(artist_name)
     best: dict[str, int] = {}
     for name, count in raw:
-        tag = " ".join(name.lower().split())
+        tag = _normalize_tag(name)
         if not tag or tag in STOP_TAGS or tag == artist_tag or count < MIN_TAG_COUNT:
             continue
-        if EXACT_YEAR.search(tag):
+        if tag.isdigit() or EXACT_YEAR.search(tag):  # "9" is a rating, "1997" a year
             continue
         best[tag] = max(count, best.get(tag, 0))
     return sorted(best.items(), key=lambda item: item[1], reverse=True)

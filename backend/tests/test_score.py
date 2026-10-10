@@ -58,3 +58,17 @@ def test_select_top_one_per_artist_and_skips_rejected():
     picked = select_top(ranked, 2, check)
     assert [album.mbid for _, album in picked] == ["Nowhere", "Spooky"]
     assert "Going Blank Again" not in checked  # never paid an MB lookup for it
+
+
+def test_rank_groups_by_artist_and_tries_most_listened_album_first():
+    profile = build_profile([[("x", 100)]])
+    cands = [
+        Candidate("Future", "Deep Cut", tags=[("x", 100)], listeners=50_000),  # best tag match
+        Candidate("Future", "DS2", tags=[("x", 80), ("y", 40)], listeners=2_000_000),
+        Candidate("Other", "Album", tags=[("z", 100)], listeners=1_000),  # no tag match
+    ]
+    ranked = rank(cands, profile, 5)
+    # Future's albums share the artist's popularity, so Deep Cut (perfect match)
+    # still puts Future first; then DS2 is tried before Deep Cut.
+    assert [s.candidate.title for s in ranked] == ["DS2", "Deep Cut", "Album"]
+    assert ranked[0].popularity == ranked[1].popularity

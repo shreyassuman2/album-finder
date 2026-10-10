@@ -6,10 +6,12 @@ each of the 6. A good engine should often "find" the album you left out.
 
 Usage (from backend/):
     .venv/bin/python eval/run_eval.py
+    .venv/bin/python eval/run_eval.py --weight popularity=0.5   # try other weights
 
 The first run is slow (many albums to fetch and cache); reruns are fast.
 """
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -24,13 +26,31 @@ from app.clients.musicbrainz import MusicBrainzClient  # noqa: E402
 from app.config import load_settings  # noqa: E402
 from app.engine.pipeline import recommend  # noqa: E402
 from app.engine.resolve import parse_input, resolve_album  # noqa: E402
+from app.engine.score import WEIGHTS  # noqa: E402
 
 SETS_PATH = Path(__file__).resolve().parent / "sets.json"
 TOP_N = 20
 SET_SIZE = 6
 
 
+def parse_weights(overrides: list[str]) -> dict:
+    """["popularity=0.5"] -> WEIGHTS with popularity replaced."""
+    weights = dict(WEIGHTS)
+    for item in overrides:
+        name, _, value = item.partition("=")
+        if name not in weights:
+            raise SystemExit(f"unknown weight {name!r}; choose from {', '.join(weights)}")
+        weights[name] = float(value)
+    return weights
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(description="Leave-one-out eval of the engine.")
+    parser.add_argument("--weight", action="append", default=[], metavar="NAME=VALUE",
+                        help="override a score weight, e.g. popularity=0.5 (repeatable)")
+    weights = parse_weights(parser.parse_args().weight)
+    print(f"weights: {weights}")
+
     sets = json.loads(SETS_PATH.read_text())
     settings = load_settings()
     cache = Cache(settings.cache_path)
@@ -54,7 +74,7 @@ def main() -> int:
             hits = artist_hits = 0
             for i, hidden in enumerate(albums):
                 inputs = albums[:i] + albums[i + 1 :]
-                recs = recommend(lastfm, mb, inputs, n=TOP_N).recommendations
+                recs = recommend(lastfm, mb, inputs, n=TOP_N, weights=weights).recommendations
                 ids = [r.album.mbid for r in recs]
                 artists = [r.album.artist.lower() for r in recs]
 

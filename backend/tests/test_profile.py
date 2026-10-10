@@ -29,3 +29,8 @@ def test_build_profile_weights_and_core():
     assert profile.core == ["shoegaze", "dream pop"]
     # post-rock beats noise pop on strength (1.0 vs 0.3) as a tie-breaker
     assert profile.strongest(3) == ["shoegaze", "dream pop", "post-rock"]
+
+
+def test_hyphen_variants_merge_and_bare_numbers_dropped():
+    raw = [("hip-hop", 80), ("Hip Hop", 100), ("9", 60), ("post-rock", 50)]
+    assert clean_tags(raw) == [("hip hop", 100), ("post rock", 50)]

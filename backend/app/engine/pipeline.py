@@ -11,7 +11,7 @@ from app.engine.candidates import Candidate, enrich, gather_candidates
 from app.engine.explain import reason
 from app.engine.profile import Profile, album_tags, build_profile
 from app.engine.resolve import ResolvedAlbum, resolve_album
-from app.engine.score import Scored, rank, select_top
+from app.engine.score import WEIGHTS, Scored, rank, select_top
 
 
 @dataclass
@@ -33,7 +33,11 @@ def is_studio_album(album: ResolvedAlbum) -> bool:
 
 
 def recommend(
-    lastfm: LastFmClient, mb: MusicBrainzClient, inputs: list[ResolvedAlbum], n: int = 5
+    lastfm: LastFmClient,
+    mb: MusicBrainzClient,
+    inputs: list[ResolvedAlbum],
+    n: int = 5,
+    weights: dict = WEIGHTS,
 ) -> EngineResult:
     # 1. Profile
     input_tags = [album_tags(lastfm, a.artist, a.title)[0] for a in inputs]
@@ -44,7 +48,7 @@ def recommend(
     enrich(lastfm, candidates)
 
     # 3. Score, then walk down the ranking keeping studio albums, one per artist
-    ranked = rank(candidates, profile, n_inputs=len(inputs))
+    ranked = rank(candidates, profile, n_inputs=len(inputs), weights=weights)
     input_ids = {a.mbid for a in inputs}
 
     def check(c: Candidate) -> ResolvedAlbum | None:
