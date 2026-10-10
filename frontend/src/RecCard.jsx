@@ -9,6 +9,9 @@ const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1)
 // a caption underneath. index staggers the entrance animation (n * 70ms).
 export default function RecCard({ rec, main, index = 0 }) {
   const meta = `${rec.artist}${rec.year ? ` · ${rec.year}` : ''}`
+  // Length of the longest word, so CSS can shrink a big title like
+  // "PARTYNEXTDOOR" until it fits instead of breaking it mid-word.
+  const longestWord = Math.max(...rec.title.split(/\s+/).map((w) => w.length))
 
   if (main) {
     return (
@@ -18,7 +21,7 @@ export default function RecCard({ rec, main, index = 0 }) {
         </div>
         <div className="main-body">
           <div className="rec-label">Your sleeper pick</div>
-          <h3>{rec.title}</h3>
+          <h3 style={{ '--chars': longestWord }}>{rec.title}</h3>
           <div className="muted">{meta}</div>
           <p className="reason">{capitalize(rec.reason)}.</p>
           <div className="main-actions">
