@@ -8,7 +8,7 @@ export default function RecCard({ rec, main }) {
     <article className={main ? 'rec rec-main' : 'rec'}>
       <Cover album={rec} size={main ? 220 : 120} />
       <div className="rec-body">
-        {main && <div className="rec-label">Your main pick</div>}
+        {main && <div className="rec-label">Your sleeper pick</div>}
         <h3>{rec.title}</h3>
         <div className="muted">{rec.artist}{rec.year ? ` · ${rec.year}` : ''}</div>
         <p className="reason">{capitalize(rec.reason)}.</p>

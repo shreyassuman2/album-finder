@@ -1,4 +1,4 @@
-# Album Finder
+# Sleeper
 
 Pick 5 albums you love and get 1 album to play next plus 4 runners-up, each with a one-line reason built from the actual score (for example, "Shares the rage and trap of your picks; similar to Lucy Bedroque and Che").
 

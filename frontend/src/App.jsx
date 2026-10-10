@@ -43,7 +43,7 @@ export default function App() {
   return (
     <main>
       <header>
-        <h1>Album Finder</h1>
+        <h1>Sleeper</h1>
         <p className="muted">Pick 5 albums you love. Get one you'll love next, plus 4 runners-up.</p>
       </header>
 

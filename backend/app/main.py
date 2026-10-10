@@ -102,7 +102,7 @@ def create_app(services: Services | None = None, frontend_origins: list[str] | N
         http.close()
         cache.close()
 
-    app = FastAPI(title="Album Finder", lifespan=lifespan)
+    app = FastAPI(title="Sleeper", lifespan=lifespan)
     if frontend_origins is None:
         frontend_origins = load_settings().frontend_origins if services is None else []
     app.add_middleware(CORSMiddleware, allow_origins=frontend_origins, allow_methods=["GET", "POST"], allow_headers=["*"])
