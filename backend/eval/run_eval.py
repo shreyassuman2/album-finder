@@ -7,6 +7,7 @@ each of the 6. A good engine should often "find" the album you left out.
 Usage (from backend/):
     .venv/bin/python eval/run_eval.py
     .venv/bin/python eval/run_eval.py --weight popularity=0.5   # try other weights
+    .venv/bin/python eval/run_eval.py --baseline                # naive comparison (eval/baseline.py)
 
 The first run is slow (many albums to fetch and cache); reruns are fast.
 """
@@ -27,6 +28,7 @@ from app.config import load_settings  # noqa: E402
 from app.engine.pipeline import recommend  # noqa: E402
 from app.engine.resolve import parse_input, resolve_album  # noqa: E402
 from app.engine.score import WEIGHTS  # noqa: E402
+from eval.baseline import similar_artists_baseline  # noqa: E402
 
 SETS_PATH = Path(__file__).resolve().parent / "sets.json"
 TOP_N = 20
@@ -48,8 +50,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Leave-one-out eval of the engine.")
     parser.add_argument("--weight", action="append", default=[], metavar="NAME=VALUE",
                         help="override a score weight, e.g. popularity=0.5 (repeatable)")
-    weights = parse_weights(parser.parse_args().weight)
-    print(f"weights: {weights}")
+    parser.add_argument("--baseline", action="store_true",
+                        help="score the naive similar-artists baseline instead of the engine")
+    args = parser.parse_args()
+    weights = parse_weights(args.weight)
+    print("BASELINE: similar artists' top albums, no scoring" if args.baseline else f"weights: {weights}")
 
     sets = json.loads(SETS_PATH.read_text())
     settings = load_settings()
@@ -74,9 +79,12 @@ def main() -> int:
             hits = artist_hits = 0
             for i, hidden in enumerate(albums):
                 inputs = albums[:i] + albums[i + 1 :]
-                recs = recommend(lastfm, mb, inputs, n=TOP_N, weights=weights).recommendations
-                ids = [r.album.mbid for r in recs]
-                artists = [r.album.artist.lower() for r in recs]
+                if args.baseline:
+                    picked = similar_artists_baseline(lastfm, mb, inputs, n=TOP_N)
+                else:
+                    picked = [r.album for r in recommend(lastfm, mb, inputs, n=TOP_N, weights=weights).recommendations]
+                ids = [a.mbid for a in picked]
+                artists = [a.artist.lower() for a in picked]
 
                 if hidden.mbid in ids:
                     hits += 1

@@ -1,5 +1,7 @@
 # Sleeper
 
+[![CI](https://github.com/shreyassuman2/sleeper/actions/workflows/ci.yml/badge.svg)](https://github.com/shreyassuman2/sleeper/actions/workflows/ci.yml)
+
 Pick 5 albums you like and get 1 album to play next plus 4 runners-up, each with a one-line reason built from a scoring index.
 
 **Live:** https://sleeper-pick.vercel.app/
@@ -44,6 +46,16 @@ score = w1 · cosine(candidate tags, your tag profile)
 
 \* The right artist appeared in the top 20, with any of their albums.
 
+**Compared with a naive baseline.** `eval/baseline.py` skips tags and scoring entirely: it takes each input's similar artists in Last.fm's order and recommends each one's most-played studio album (`run_eval.py --baseline`).
+
+| Approach | Album hit rate | Artist hit rate |
+|---|---|---|
+| Naive similar-artists baseline | 47% | 85% |
+| Engine without the popularity penalty | 47% | 82% |
+| Engine (current) | 45% | 78% |
+
+On these sets the engine doesn't beat the baseline yet. Leave-one-out rewards predicting albums the listener already likes, and those tend to be the best-known albums by the most similar artists. That's exactly what the baseline returns and what the popularity penalty pushes away from, since Sleeper is meant to surface less obvious picks. Better ways to measure that, and more varied eval sets, are next.
+
 Changing the popularity weight to anything from 0.5 to 1.5 gives the same result (45%), so the weight doesn't matter too much. The 10 sets cover rap, rage, digicore, hyperpop and art pop from 2015–2025. They lean toward well-known albums, which favors the "best-known album first" rule. 
 
 ## Data sources
@@ -55,6 +67,15 @@ Changing the popularity weight to anything from 0.5 to 1.5 gives the same result
 | [Cover Art Archive](https://coverartarchive.org) | album covers (loaded by the browser) | |
 
 Every API response goes through a SQLite cache (`backend/app/cache.py`), keyed by the endpoint plus the sorted request parameters. The API key is never stored in the cache. A rate limiter keeps each API under its limit, and cache hits skip it entirely. Nothing is scraped, and Spotify's recommendation endpoints aren't used.
+
+## Design decisions
+
+- **Albums are keyed by MusicBrainz release-group ID, never by name.** "Blonde", "Blond" and a deluxe reissue are the same release group, so editions and duplicate titles can't split or merge albums by accident.
+- **Every API response goes through a SQLite cache,** and each API has its own rate limiter (MusicBrainz allows 1 request per second). Cache hits skip the limiter, so repeat work is instant and the app never gets rate-limited.
+- **Explanations are templates, not an LLM.** The reason is built from the same tags and similar-artist links that produced the score, so it can't describe something the engine didn't actually use.
+- **Inputs are always clustered.** Mixed picks (say 2 rap, 2 jazz and 1 shoegaze album) would average into a profile that matches nothing, so the engine recommends for the biggest group and says so.
+- **Plain `def` endpoints, not `async`.** The clients block on HTTP and on the rate limiter, so FastAPI runs each request on a worker thread and one slow request doesn't hold up the others.
+- **No accounts.** Results are shareable because the 5 picks live in the URL (`/?albums=...`), and nothing about the visitor is stored.
 
 ## Stack
 
@@ -90,11 +111,13 @@ In development, Vite forwards `/api/...` to the backend, so no extra setup is ne
     "Cocteau Twins - Heaven or Las Vegas" "my bloody valentine - Loveless"
 .venv/bin/python eval/run_eval.py                         # slow on the first run while the cache fills
 .venv/bin/python eval/run_eval.py --weight popularity=0.5 # try other weights
+.venv/bin/python eval/run_eval.py --baseline              # naive comparison
 .venv/bin/python -m pytest
 ```
 
 ## API
 
+- `GET /health` returns `{ "status": "ok" }`. The frontend calls it on page load to wake a sleeping server early.
 - `GET /search?q=carti whole lotta` returns up to 8 `{ mbid, title, artist, year, cover_url }`. Search works best with the artist plus the album, or the artist alone.
 - `GET /albums?ids=id1,id2,...` (1 to 5 IDs) returns those albums in the same shape, in order. The frontend uses it to open shared links like `/?albums=id1,...,id5`.
 - `POST /recommend` with `{ "album_ids": [5 MusicBrainz release-group IDs] }` returns `{ main, runners_up[4], cluster_note }`. Each recommendation has `mbid, title, artist, year, cover_url, reason, listen_url, score`.
