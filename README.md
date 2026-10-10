@@ -1,8 +1,8 @@
 # Sleeper
 
-Pick 5 albums you love and get 1 album to play next plus 4 runners-up, each with a one-line reason built from the actual score (for example, "Shares the rage and trap of your picks; similar to Lucy Bedroque and Che").
+Pick 5 albums you like and get 1 album to play next plus 4 runners-up, each with a one-line reason built from a scoring index.
 
-**Live:** https://album-finder-theta.vercel.app
+**Live:** https://sleeper-pick.vercel.app/
 
 ![Demo: searching for 5 albums and getting recommendations](docs/demo.gif)
 
@@ -10,9 +10,9 @@ Pick 5 albums you love and get 1 album to play next plus 4 runners-up, each with
 
 ## How it works
 
-The recommendation engine is the core of the project; the website is a thin layer on top. Each step is a plain function in `backend/app/engine/`.
+The recommendation engine is the core of the project. Each step is a function in `backend/app/engine/`.
 
-1. **Resolve** (`resolve.py`): each input is matched to one MusicBrainz *release group*, the ID shared by every edition of an album. Everything after this is keyed by that ID, not by name strings, so deluxe editions and remasters don't break matching. A match is rejected unless its artist and title closely resemble the input (this catches typos like "Playboy Carti").
+1. **Resolve** (`resolve.py`): each input is matched to one MusicBrainz *release group*, the ID shared by every edition of an album. Everything after this is keyed by that ID, not by name strings, so deluxe editions and remasters don't break matching. A match is rejected unless its artist and title closely resemble the input.
 2. **Profile** (`profile.py`): each album's Last.fm tags are cleaned (lowercased; `hip-hop` = `hip hop`; junk like "seen live", "favorite", ratings and exact years removed; decades like "90s" kept). A tag's weight is the number of your 5 albums carrying it. Tags on 2 or more albums are **core**.
 3. **Clusters** (`clusters.py`): if your picks split into unrelated groups (say 2 rap, 2 jazz and 1 shoegaze album), the engine recommends for the biggest group and tells you which albums it focused on. Two albums are linked if their tags share a meaningful word or one artist is on the other's similar-artists list.
 4. **Candidates** (`candidates.py`): the top 5 albums of each input artist's 10 most similar artists, plus Last.fm's top albums for your 3 strongest tags. Your own artists are excluded.
@@ -27,10 +27,10 @@ score = w1 · cosine(candidate tags, your tag profile)
       − w3 · popularity
 ```
 
-- **cosine** compares the *mix* of tags (1.0 means the same tags in the same proportions), so an album isn't rewarded just for having more tags.
-- **popularity** is the artist's listener count on a log scale from 0 to 1: 1,000 listeners → 0.43, 100,000 → 0.71, 2,000,000 → 0.90. It nudges results toward artists you may not know yet.
+- **cosine** compares the *mix* of tags (1.0 means the same tags in the same proportions), so an album isn't rewarded  for having more tags.
+- **popularity** is the artist's listener count on a log scale from 0 to 1: 1,000 listeners → 0.43, 100,000 → 0.71, 2,000,000 → 0.90. It nudges results toward artists you may not know yet(which is why it's named sleeper pick)
 - Weights start equal (`w1 = w2 = w3 = 1.0`) in one dict in `score.py`.
-- Popularity is judged **per artist**: it decides which artists get suggested, while each artist's best-known album is tried first. If you don't know an artist yet, the record most people know is the natural place to start.
+- Popularity is judged **per artist**: it decides which artists get suggested, while each artist's best-known album is tried first. If you don't know an artist yet, the record most people know will most likely be a natural place to start.
 
 ## Evaluation
 
@@ -44,7 +44,7 @@ score = w1 · cosine(candidate tags, your tag profile)
 
 \* The right artist appeared in the top 20, with any of their albums.
 
-Changing the popularity weight to anything from 0.5 to 1.5 gives the same result (45%), so the weight barely matters. The 10 sets cover rap, rage, digicore, hyperpop and art pop from 2015–2025. They were drafted with an AI assistant and lean toward well-known albums, which favors the "best-known album first" rule. Sets written by real listeners would give a fairer number.
+Changing the popularity weight to anything from 0.5 to 1.5 gives the same result (45%), so the weight doesn't matter too much. The 10 sets cover rap, rage, digicore, hyperpop and art pop from 2015–2025. They lean toward well-known albums, which favors the "best-known album first" rule. 
 
 ## Data sources
 
