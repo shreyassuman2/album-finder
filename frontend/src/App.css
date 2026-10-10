@@ -191,7 +191,6 @@ h1 { margin: 24px 0 0; font-size: clamp(2.25rem, 4vw, 3rem); line-height: 1.02; 
 .demo .cover { width: 100%; height: auto; aspect-ratio: 1; }
 .demo-arrow { color: var(--pop); animation: fade-up 0.5s 0.65s var(--ease-out) both; }
 .demo-out { overflow: hidden; box-shadow: 0 0 0 3px var(--pop); animation: reveal 0.9s 0.8s var(--ease-out) both; }
-.demo figcaption { grid-column: 1 / -1; }
 
 /* About: API example and endpoint list. */
 .code {

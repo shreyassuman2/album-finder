@@ -66,9 +66,6 @@ export default function About() {
         <div className="demo-out">
           <Cover album={DEMO_PICK} />
         </div>
-        <figcaption className="muted small">
-          A real run: Blonde, Freudian, Take Care, Ctrl and WASTELAND in, PARTYNEXTDOOR out.
-        </figcaption>
       </figure>
 
       <section>
