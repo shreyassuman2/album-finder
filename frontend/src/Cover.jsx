@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { MusicNote } from '@phosphor-icons/react'
 
 // Album cover from the Cover Art Archive, or a placeholder if it has none
 // (the image request fails, onError fires, and we swap in the placeholder).
@@ -6,7 +7,9 @@ export default function Cover({ album, size }) {
   const [missing, setMissing] = useState(false)
   const style = { width: size, height: size }
   if (missing) {
-    return <div className="cover cover-missing" style={style} aria-label="No cover available">♪</div>
+    return <div className="cover cover-missing" style={style} aria-label="No cover available">
+        <MusicNote size={Math.round(size * 0.4)} />
+      </div>
   }
   return (
     <img

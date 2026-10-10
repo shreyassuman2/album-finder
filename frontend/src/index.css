@@ -21,8 +21,13 @@
   --led-3: #3f7f93;
   --led-4: #c9a75e;
   --led-peak: 0.16;
+  /* Corner radius rule: containers (inputs, buttons, slots, cards, dropdown)
+     use --radius; things inside them (covers, list rows, icon buttons, LED
+     boxes, skeleton bars) use --radius-sm. */
+  --radius: 12px;
+  --radius-sm: 8px;
   --vinyl-opacity: 0.1;
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-size: 17px;
   color: var(--text);

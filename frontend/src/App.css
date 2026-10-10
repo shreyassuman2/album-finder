@@ -7,11 +7,12 @@ header h1 { margin: 0 0 4px; font-size: 2.75rem; font-weight: 800; letter-spacin
 /* Search */
 .picker { margin-top: 24px; display: grid; gap: 16px; }
 .search { position: relative; }
+.search-label { display: block; margin-bottom: 8px; font-size: 0.875rem; font-weight: 600; color: var(--muted); }
 .search input {
   backdrop-filter: blur(12px);
   transition: box-shadow 0.2s;
   width: 100%; padding: 12px 14px; font: inherit; color: var(--text);
-  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
 }
 .search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 15%, transparent); }
 .search-status { padding: 8px 4px 0; font-size: 0.875rem; color: var(--muted); }
@@ -19,17 +20,18 @@ header h1 { margin: 0 0 4px; font-size: 2.75rem; font-weight: 800; letter-spacin
 .search-results {
   position: absolute; z-index: 10; left: 0; right: 0; top: calc(100% + 4px);
   margin: 0; padding: 4px; list-style: none;
-  background: var(--surface-solid); border: 1px solid var(--border); border-radius: 10px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.15); animation: drop-in 0.15s ease-out;
+  background: var(--surface-solid); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgb(2 4 12 / 0.5); animation: drop-in 0.15s ease-out;
 }
-.search-results li { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.search-results li { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: var(--radius-sm); cursor: pointer; }
+.result-text { display: grid; min-width: 0; }
 .search-results li.highlighted { background: var(--border); }
 
 /* Slots */
 .slots { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
 .slot {
   display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 8px 12px;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   backdrop-filter: blur(12px);
 }
 /* Filled slots pop in; the slight overshoot comes from the bezier going past 1. */
@@ -38,20 +40,22 @@ header h1 { margin: 0 0 4px; font-size: 2.75rem; font-weight: 800; letter-spacin
 .slot-text { display: grid; flex: 1; min-width: 0; }
 .slot-text > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .remove {
-  font-size: 1.4rem; line-height: 1; padding: 4px 10px; color: var(--muted);
-  background: none; border: none; border-radius: 6px; cursor: pointer;
+  display: inline-flex; padding: 8px; color: var(--muted);
+  background: none; border: none; border-radius: var(--radius-sm); cursor: pointer;
+  transition: transform 0.1s;
 }
 .remove:hover { color: var(--text); background: var(--border); }
+.remove:active { transform: scale(0.92); }
 
 .go {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  padding: 13px 16px; font: inherit; font-weight: 600; border: none; border-radius: 10px;
+  padding: 13px 16px; font: inherit; font-weight: 600; border: none; border-radius: var(--radius);
   color: var(--accent-text); cursor: pointer;
   background: var(--accent);
   transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
 }
-.go:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent); }
-.go:not(:disabled):active { transform: translateY(0); }
+.go:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgb(2 4 12 / 0.55); }
+.go:not(:disabled):active { transform: translateY(1px) scale(0.98); box-shadow: none; }
 .go:disabled { opacity: 0.45; cursor: not-allowed; }
 .go:disabled:has(.eq) { opacity: 0.85; cursor: progress; } /* loading isn't "unavailable" */
 
@@ -63,29 +67,30 @@ header h1 { margin: 0 0 4px; font-size: 2.75rem; font-weight: 800; letter-spacin
 .eq i:nth-child(4) { animation-delay: -0.15s; }
 
 /* Covers */
-.cover { flex-shrink: 0; border-radius: 6px; object-fit: cover; background: var(--border); }
-.cover-missing { display: grid; place-items: center; color: var(--muted); font-size: 1.5rem; }
+.cover { flex-shrink: 0; border-radius: var(--radius-sm); object-fit: cover; background: var(--border); }
+.cover-missing { display: grid; place-items: center; color: var(--muted); }
 
 /* Results */
 .results { margin-top: 40px; display: grid; gap: 16px; }
 .results h2 { margin: 16px 0 0; font-size: 1.1rem; text-align: center; }
-.cluster-note { animation: rise 0.4s ease-out both; backdrop-filter: blur(12px); margin: 0; padding: 10px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+.cluster-note { animation: rise 0.4s ease-out both; backdrop-filter: blur(12px); margin: 0; padding: 10px 14px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); }
 .rec {
   display: flex; gap: 16px; padding: 14px;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   backdrop-filter: blur(12px);
   /* Cards rise in one after another: --i is set per card in RecCard.jsx. */
   animation: rise 0.5s ease-out both; animation-delay: calc(var(--i, 0) * 80ms + 150ms);
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
-.rec:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgb(0 0 0 / 0.18); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+.rec:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgb(2 4 12 / 0.5); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
 .rec .cover { transition: transform 0.3s; }
 .rec:hover .cover { transform: scale(1.03); }
 .rec-main { animation-delay: 0ms; padding: 18px; }
 
-/* Main pick: a record that slides out from behind the cover, then spins. */
+/* Main pick: a record slides out from behind the cover, and spins while
+   you hover the card (like it's playing). */
 .cover-wrap { position: relative; flex-shrink: 0; margin-right: 72px; }
-.cover-wrap .cover { position: relative; z-index: 1; box-shadow: 0 10px 30px rgb(0 0 0 / 0.3); }
+.cover-wrap .cover { position: relative; z-index: 1; box-shadow: 0 10px 30px rgb(2 4 12 / 0.6); }
 .rec:hover .cover-wrap .cover { transform: none; }
 .mini-vinyl {
   position: absolute; inset: 5%; border-radius: 50%;
@@ -98,17 +103,21 @@ header h1 { margin: 0 0 4px; font-size: 2.75rem; font-weight: 800; letter-spacin
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
   /* Two animations on separate properties (translate vs rotate) so they
      don't overwrite each other the way two "transform" animations would. */
-  animation: slide-out 0.8s 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both, spin 3s 1.2s linear infinite;
+  animation: slide-out 0.8s 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both, spin 3s linear infinite;
+  /* The spin starts paused. Pausing/resuming instead of adding the animation
+     on hover means it picks up where it stopped and the slide-out doesn't replay. */
+  animation-play-state: running, paused;
   transition: translate 0.4s;
 }
-.rec-main:hover .mini-vinyl { translate: 46% 0; }
+.rec-main:hover .mini-vinyl { translate: 46% 0; animation-play-state: running, running; }
 .rec h3 { margin: 0; font-size: 1.05rem; }
 .rec-main h3 { font-size: 1.5rem; }
 .rec-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); }
 .rec-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .reason { margin: 6px 0; }
-.listen { margin-top: auto; width: fit-content; font-weight: 600; color: var(--accent); text-decoration: none; transition: letter-spacing 0.2s; }
-.listen:hover { letter-spacing: 0.02em; }
+.listen { margin-top: auto; display: inline-flex; align-items: center; gap: 4px; width: fit-content; font-weight: 600; color: var(--accent); text-decoration: none; }
+.listen svg { transition: transform 0.2s; }
+.listen:hover svg { transform: translate(2px, -2px); }
 /* Flex-wrap instead of grid so an odd card out (e.g. 3 runners-up) sits
    centered on its own row rather than stuck on the left. */
 .runners-up { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
@@ -119,8 +128,19 @@ header h1 { margin: 0 0 4px; font-size: 2.75rem; font-weight: 800; letter-spacin
   .rec-main .cover { width: 100% !important; height: auto !important; aspect-ratio: 1; }
   .cover-wrap { margin-right: 0; }
   .mini-vinyl { display: none; } /* no room beside a full-width cover */
+  .rec-main .sk-cover { width: 100%; height: auto; aspect-ratio: 1; }
   .runners-up .rec { max-width: 100%; }
 }
+
+/* Loading skeleton (ResultsSkeleton in App.jsx): grey blocks that gently pulse. */
+.skeleton { pointer-events: none; }
+.sk { background: var(--border); border-radius: var(--radius-sm); animation: sk-pulse 1.4s ease-in-out infinite; }
+.sk-cover { flex-shrink: 0; width: 120px; height: 120px; }
+.rec-main .sk-cover { width: 220px; height: 220px; }
+.sk-lines { flex: 1; display: grid; gap: 10px; align-content: start; padding-top: 4px; }
+.sk-title { height: 22px; width: 60%; }
+.sk-line { height: 14px; }
+.w40 { width: 40%; } .w70 { width: 70%; } .w90 { width: 90%; }
 
 /* Intro: header and picker fade up on page load. */
 header { animation: rise 0.6s ease-out both; }
@@ -135,7 +155,7 @@ header { animation: rise 0.6s ease-out both; }
   mask-image: radial-gradient(ellipse at center, transparent 25%, rgb(0 0 0 / 0.7) 85%);
 }
 .led {
-  aspect-ratio: 1; border-radius: 8px; opacity: 0.03;
+  aspect-ratio: 1; border-radius: var(--radius-sm); opacity: 0.03;
   animation-name: led; animation-timing-function: ease-in-out; animation-iteration-count: infinite;
 }
 .vinyl {
@@ -153,6 +173,7 @@ header { animation: rise 0.6s ease-out both; }
 @keyframes drop-in { from { opacity: 0; transform: translateY(-4px); } }
 @keyframes spin { to { rotate: 360deg; } }
 @keyframes slide-out { from { translate: 0 0; } to { translate: 38% 0; } }
+@keyframes sk-pulse { 50% { opacity: 0.45; } }
 @keyframes eq { from { transform: scaleY(0.25); } to { transform: scaleY(1); } }
 /* Each box sits dim most of the cycle, then briefly glows and fades. Every box
    has its own random duration and delay (Background.jsx), so they're out of sync. */
@@ -166,4 +187,10 @@ header { animation: rise 0.6s ease-out both; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .mini-vinyl { translate: 38% 0; }
+}
+
+/* People who turn on "reduce transparency" get solid cards with no blur. */
+@media (prefers-reduced-transparency: reduce) {
+  :root { --surface: var(--surface-solid); }
+  .search input, .slot, .rec, .cluster-note { backdrop-filter: none; }
 }

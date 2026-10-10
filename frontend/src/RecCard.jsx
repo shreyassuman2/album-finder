@@ -1,3 +1,4 @@
+import { ArrowUpRight } from '@phosphor-icons/react'
 import Cover from './Cover'
 
 // "shares the rage of your picks" -> "Shares the rage of your picks"
@@ -22,7 +23,7 @@ export default function RecCard({ rec, main, index = 0 }) {
         <div className="muted">{rec.artist}{rec.year ? ` · ${rec.year}` : ''}</div>
         <p className="reason">{capitalize(rec.reason)}.</p>
         <a className="listen" href={rec.listen_url} target="_blank" rel="noreferrer">
-          Listen ↗
+          Listen <ArrowUpRight size={16} weight="bold" aria-hidden="true" />
         </a>
       </div>
     </article>

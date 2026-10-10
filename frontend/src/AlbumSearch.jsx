@@ -75,7 +75,11 @@ export default function AlbumSearch({ onPick, disabled, excludeIds }) {
 
   return (
     <div className="search">
+      <label className="search-label" htmlFor="album-search">
+        Search for an album
+      </label>
       <input
+        id="album-search"
         ref={inputRef}
         type="search"
         value={query}
@@ -83,7 +87,6 @@ export default function AlbumSearch({ onPick, disabled, excludeIds }) {
         onKeyDown={onKeyDown}
         disabled={disabled}
         placeholder={disabled ? 'All 5 picked' : 'Artist and album, e.g. "frank ocean blonde"'}
-        aria-label="Search for an album"
         autoComplete="off"
       />
       {loading && (
@@ -108,9 +111,9 @@ export default function AlbumSearch({ onPick, disabled, excludeIds }) {
               onClick={() => pick(album)}
             >
               <Cover album={album} size={40} />
-              <span>
+              <span className="result-text">
                 <strong>{album.title}</strong>
-                <span className="muted"> · {album.artist}{album.year ? ` · ${album.year}` : ''}</span>
+                <span className="muted">{album.artist}{album.year ? ` · ${album.year}` : ''}</span>
               </span>
             </li>
           ))}

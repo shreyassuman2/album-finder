@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { X } from '@phosphor-icons/react'
 import AlbumSearch from './AlbumSearch'
 import Background from './Background'
 import Cover from './Cover'
@@ -63,7 +64,7 @@ export default function App() {
                     <span className="muted">{album.artist}</span>
                   </span>
                   <button className="remove" onClick={() => removePick(album.mbid)} aria-label={`Remove ${album.title}`}>
-                    ×
+                    <X size={18} weight="bold" />
                   </button>
                 </>
               ) : (
@@ -90,6 +91,8 @@ export default function App() {
         {error && <p className="error">{error}</p>}
       </section>
 
+      {loading && <ResultsSkeleton />}
+
       {result && (
         <section className="results">
           {result.cluster_note && <p className="cluster-note">{result.cluster_note}</p>}
@@ -108,5 +111,35 @@ export default function App() {
       )}
     </main>
     </>
+  )
+}
+
+// Grey placeholder cards in the same shape as the results (1 main + 4
+// runners-up), shown while the engine works, so the page doesn't jump when
+// the real cards arrive. aria-hidden: the button already says it's loading.
+function ResultsSkeleton() {
+  const lines = (
+    <div className="sk-lines">
+      <div className="sk sk-title" />
+      <div className="sk sk-line w40" />
+      <div className="sk sk-line w90" />
+      <div className="sk sk-line w70" />
+    </div>
+  )
+  return (
+    <section className="results" aria-hidden="true">
+      <div className="rec rec-main skeleton">
+        <div className="sk sk-cover" />
+        {lines}
+      </div>
+      <div className="runners-up">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="rec skeleton" style={{ '--i': i }}>
+            <div className="sk sk-cover" />
+            {lines}
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
