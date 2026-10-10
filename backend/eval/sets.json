@@ -1,13 +1,112 @@
 [
   {
-    "name": "EXAMPLE (replace with real sets): 90s shoegaze / dream pop",
+    "name": "Rage / Opium",
     "albums": [
-      "Slowdive - Souvlaki",
-      "my bloody valentine - Loveless",
-      "Cocteau Twins - Heaven or Las Vegas",
-      "Ride - Nowhere",
-      "Mazzy Star - So Tonight That I Might See",
-      "Lush - Spooky"
+      "Playboi Carti - Whole Lotta Red",
+      "Ken Carson - A Great Chaos",
+      "Destroy Lonely - If Looks Could Kill",
+      "Yeat - 2 Alivë",
+      "Trippie Redd - Trip at Knight",
+      "Lil Uzi Vert - Eternal Atake"
+    ]
+  },
+  {
+    "name": "Digicore / hyperpop",
+    "albums": [
+      "glaive - I Care So Much That I Don't Care at All",
+      "ericdoa - things with wings",
+      "brakence - punk2",
+      "underscores - fishmonger",
+      "100 gecs - 1000 gecs",
+      "Quadeca - I Didn't Mean to Haunt You"
+    ]
+  },
+  {
+    "name": "Atlanta trap",
+    "albums": [
+      "Young Thug - So Much Fun",
+      "Gunna - Drip or Drown 2",
+      "Lil Baby - My Turn",
+      "Future - DS2",
+      "21 Savage - Issa Album",
+      "Lil Keed - Long Live Mexico"
+    ]
+  },
+  {
+    "name": "Emo rap / SoundCloud era",
+    "albums": [
+      "Juice WRLD - Goodbye & Good Riddance",
+      "XXXTENTACION - 17",
+      "Lil Peep - Come Over When You're Sober, Pt. 1",
+      "Trippie Redd - Life's a Trip",
+      "Lil Uzi Vert - Luv Is Rage 2",
+      "Lil Skies - Shelby"
+    ]
+  },
+  {
+    "name": "Experimental / abstract rap",
+    "albums": [
+      "JPEGMAFIA - Veteran",
+      "Danny Brown - Atrocity Exhibition",
+      "Death Grips - Bottomless Pit",
+      "clipping. - Splendor & Misery",
+      "Injury Reserve - By the Time I Get to Phoenix",
+      "billy woods - Aethiopes"
+    ]
+  },
+  {
+    "name": "West coast / lyrical",
+    "albums": [
+      "Kendrick Lamar - DAMN.",
+      "Vince Staples - Big Fish Theory",
+      "Anderson .Paak - Malibu",
+      "Isaiah Rashad - The Sun's Tirade",
+      "Baby Keem - The Melodic Blue",
+      "Tyler, The Creator - Flower Boy"
+    ]
+  },
+  {
+    "name": "Psychedelic / melodic (Travis-adjacent)",
+    "albums": [
+      "Travis Scott - Rodeo",
+      "Don Toliver - Heaven or Hell",
+      "Kids See Ghosts - Kids See Ghosts",
+      "Kanye West - The Life of Pablo",
+      "Kid Cudi - Man on the Moon III: The Chosen",
+      "Tyler, The Creator - IGOR"
+    ]
+  },
+  {
+    "name": "2024-2025 underground rage",
+    "albums": [
+      "Che - Rest In Bass",
+      "Jane Remover - Revengeseekerz",
+      "bleood - rascal 51",
+      "prettifun - FunHouse",
+      "Ken Carson - More Chaos",
+      "Playboi Carti - Music"
+    ]
+  },
+  {
+    "name": "Mainstream rap / pop crossover",
+    "albums": [
+      "Drake - Scorpion",
+      "Post Malone - Hollywood's Bleeding",
+      "The Weeknd - After Hours",
+      "Travis Scott - Astroworld",
+      "Roddy Ricch - Please Excuse Me for Being Antisocial",
+      "DaBaby - Kirk"
+    ]
+  },
+  {
+    "name": "Drain Gang / art pop",
+    "albums": [
+      "Bladee - Red Light",
+      "Ecco2k - E",
+      "Yung Lean - Stranger",
+      "Charli XCX - how i'm feeling now",
+      "Jane Remover - Census Designated",
+      "SOPHIE - Oil of Every Pearl's Un-Insides"
     ]
   }
 ]
