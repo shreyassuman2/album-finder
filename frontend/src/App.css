@@ -14,7 +14,13 @@
   display: grid; gap: 16px;
   animation: fade-up 0.6s var(--ease-out) both;
 }
-.brand { font-weight: 700; letter-spacing: -0.01em; }
+.topbar { display: flex; justify-content: space-between; align-items: center; }
+.brand { font-weight: 700; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+.nav-link {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; font-weight: 600;
+  color: var(--muted); text-decoration: none; transition: color 0.15s;
+}
+.nav-link:hover { color: var(--ink); }
 .brand::after { content: ''; display: inline-block; width: 8px; height: 8px; margin-left: 4px; background: var(--pop); }
 h1 { margin: 24px 0 0; font-size: clamp(2.25rem, 4vw, 3rem); line-height: 1.02; letter-spacing: -0.045em; font-weight: 700; }
 .examples { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -165,6 +171,19 @@ h1 { margin: 24px 0 0; font-size: clamp(2.25rem, 4vw, 3rem); line-height: 1.02; 
 .runner .sk-line { margin-top: 6px; }
 .w30 { width: 30%; } .w40 { width: 40%; } .w70 { width: 70%; } .w90 { width: 90%; }
 
+/* About page: one readable column. */
+.about { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; display: grid; gap: 32px; animation: fade-up 0.6s var(--ease-out) both; }
+.about h1 { margin: 24px 0 0; }
+.about-lede { margin: -16px 0 0; font-size: 1.125rem; color: var(--muted); max-width: 52ch; }
+.about section { display: grid; gap: 12px; padding-top: 24px; border-top: 1px solid var(--line-strong); }
+.about h2 { margin: 0; font-size: 1.25rem; letter-spacing: -0.02em; }
+.about p { margin: 0; max-width: 65ch; }
+.steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 20px; }
+.steps li { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 12px; }
+.step-num { padding-top: 2px; font-size: 0.875rem; color: var(--pop); }
+.steps h3 { margin: 0 0 4px; font-size: 1rem; }
+.steps p { color: var(--muted); }
+
 /* Tablet and down: one column, picker no longer sticky. */
 @media (max-width: 1023px) {
   .layout { grid-template-columns: 1fr; gap: 48px; padding: 32px 24px 64px; }
@@ -176,6 +195,7 @@ h1 { margin: 24px 0 0; font-size: clamp(2.25rem, 4vw, 3rem); line-height: 1.02; 
 /* Phones: stack the main pick, runners-up become rows (cover left, text right). */
 @media (max-width: 640px) {
   .layout { padding: 24px 16px 56px; }
+  .about { padding: 24px 16px 56px; }
   .rec-main { grid-template-columns: 1fr; gap: 20px; }
   .runners-up { grid-template-columns: 1fr; gap: 20px; }
   .runner { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 16px; align-content: start; }

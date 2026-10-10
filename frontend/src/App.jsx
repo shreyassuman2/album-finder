@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { X } from '@phosphor-icons/react'
+import About from './About'
 import AlbumSearch from './AlbumSearch'
 import Cover from './Cover'
 import RecCard from './RecCard'
@@ -15,7 +16,20 @@ function sharedIds() {
   return param ? param.split(',').filter(Boolean) : []
 }
 
+// The About page lives at #about. Using the URL hash instead of a router
+// library keeps it linkable and lets ?albums=... shared links work as before.
+function useHash() {
+  const [hash, setHash] = useState(window.location.hash)
+  useEffect(() => {
+    const onChange = () => setHash(window.location.hash)
+    window.addEventListener('hashchange', onChange)
+    return () => window.removeEventListener('hashchange', onChange)
+  }, [])
+  return hash
+}
+
 export default function App() {
+  const hash = useHash()
   const [picks, setPicks] = useState([])
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -83,13 +97,20 @@ export default function App() {
     // Empty list: run once, on page load.
   }, [])
 
+  // Rendered here (not as a separate app) so picks and results are still
+  // there when you come back from the About page.
+  if (hash === '#about') return <About />
+
   const slots = Array.from({ length: SLOTS }, (_, i) => picks[i])
 
   return (
     <div className="layout">
       {/* Left column: stays in view (sticky) on wide screens while results scroll. */}
       <aside className="picker">
-        <div className="brand">Sleeper</div>
+        <nav className="topbar">
+          <a className="brand" href="#">Sleeper</a>
+          <a className="nav-link" href="#about">About</a>
+        </nav>
         <h1>Five albums you love.</h1>
         <p className="lede">We'll find an album you'll enjoy, plus four more worth a listen.</p>
         <div className="examples">
