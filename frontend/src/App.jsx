@@ -88,7 +88,7 @@ export default function App() {
       <aside className="picker">
         <div className="brand">Sleeper</div>
         <h1>Five albums you love.</h1>
-        <p className="lede">We'll find one you'll love next, plus four runners-up.</p>
+        <p className="lede">We'll find an album you'll enjoy, plus four more worth a listen.</p>
 
         <AlbumSearch onPick={addPick} disabled={picks.length >= SLOTS} excludeIds={pickedIds} />
 
