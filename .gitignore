@@ -4,3 +4,8 @@ cache.db
 .venv/
 __pycache__/
 .pytest_cache/
+
+# Locally installed Claude Code skills (personal tooling, not part of the app)
+.agents/
+.claude/skills/
+skills-lock.json
