@@ -17,6 +17,15 @@ class Settings:
     frontend_origins: list[str]  # sites allowed to call the API from a browser (CORS)
 
 
+def parse_origins(value: str) -> list[str]:
+    """ "https://a.vercel.app/, http://localhost:5173" -> ["https://a.vercel.app", "http://localhost:5173"]
+
+    Browsers send the origin with no trailing slash, and CORS needs an exact
+    match, so a pasted "https://site.vercel.app/" would never match.
+    """
+    return [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
+
+
 def load_settings() -> Settings:
     load_dotenv(BACKEND_DIR / ".env")
 
@@ -34,6 +43,5 @@ def load_settings() -> Settings:
         lastfm_api_key=os.environ["LASTFM_API_KEY"],
         mb_user_agent=os.environ["MB_USER_AGENT"],
         cache_path=cache_path,
-        # Comma-separated, e.g. "http://localhost:5173,https://album-finder.vercel.app"
-        frontend_origins=os.environ.get("FRONTEND_ORIGIN", "http://localhost:5173").split(","),
+        frontend_origins=parse_origins(os.environ.get("FRONTEND_ORIGIN", "http://localhost:5173")),
     )
