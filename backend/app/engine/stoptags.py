@@ -15,6 +15,7 @@ STOP_TAGS = frozenset({
     "albums of the year", "love", "loved", "love it", "awesome", "amazing",
     "cool", "good", "great", "best", "masterpiece", "classic albums",
     "5 stars", "10/10", "10 of 10", "perfect",
-    # meta
-    "album", "albums", "music", "under 2000 listeners",
+    "classic", "essential", "albums i love",
+    # meta / too vague to say anything
+    "album", "albums", "music", "under 2000 listeners", "all", "vocals",
 })

@@ -78,6 +78,23 @@ class LastFmClient:
         tags = _as_list(data.get("toptags", {}).get("tag"))
         return [(t["name"], int(t.get("count", 0))) for t in tags]
 
+    def artist_top_albums(self, artist: str, limit: int = 5) -> list[str]:
+        """Album titles, most played first."""
+        data = self._call("artist.gettopalbums", artist=artist, limit=limit)
+        albums = _as_list(data.get("topalbums", {}).get("album"))
+        return [a["name"] for a in albums]
+
+    def tag_top_albums(self, tag: str, limit: int = 20) -> list[tuple[str, str]]:
+        """[(artist, album title)] Last.fm ranks highest for this tag."""
+        data = self._call("tag.gettopalbums", tag=tag, limit=limit)
+        albums = _as_list(data.get("albums", {}).get("album"))
+        return [(a["artist"]["name"], a["name"]) for a in albums]
+
+    def album_listeners(self, artist: str, album: str) -> int:
+        """How many Last.fm users have played this album (0 if unknown)."""
+        data = self._call("album.getinfo", artist=artist, album=album)
+        return int(data.get("album", {}).get("listeners", 0))
+
     def similar_artists(self, artist: str, limit: int = 20) -> list[tuple[str, float]]:
         """[(artist name, match)], match is 0-1, most similar first."""
         data = self._call("artist.getsimilar", artist=artist, limit=limit)
