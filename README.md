@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/shreyassuman2/sleeper/actions/workflows/ci.yml/badge.svg)](https://github.com/shreyassuman2/sleeper/actions/workflows/ci.yml)
 
-Pick 5 albums you like and get 1 album to play next plus 4 runners-up, each with a one-line reason built from a scoring index.
+Pick 5 albums you like and get 1 niche album to play next plus 4 runners-up, each with a one-line reason built from a scoring index.
 
 **Live:** https://sleeper-pick.vercel.app/
 
