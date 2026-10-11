@@ -37,7 +37,12 @@ const STEPS = [
 // The About page (shown at /#about). Plain content, no data fetching.
 export default function About() {
   // Start at the top, not wherever the picker page was scrolled to.
-  useEffect(() => window.scrollTo(0, 0), [])
+  // Braces matter: React treats an effect's return value as its cleanup
+  // function, and newer browsers make scrollTo return a Promise. Returning
+  // that crashes the app (blank screen) when you leave this page.
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   return (
     <div className="about">
