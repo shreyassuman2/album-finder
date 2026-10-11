@@ -54,7 +54,7 @@ score = w1 · cosine(candidate tags, your tag profile)
 | Engine without the popularity penalty | 47% | 82% |
 | Engine (current) | 45% | 78% |
 
-On these sets the engine doesn't beat the baseline yet. Leave-one-out rewards predicting albums the listener already likes, and those tend to be the best-known albums by the most similar artists. That's exactly what the baseline returns and what the popularity penalty pushes away from, since Sleeper is meant to surface less obvious picks. Better ways to measure that, and more varied eval sets, are next.
+On these sets the engine doesn't beat the baseline. This happens because leave-one-out evaluation rewards predicting albums the listener already likes, which usually are the most popular albums from the most similar artists. That's what the baseline returns and what the popularity penalty pushes away from, since Sleeper is meant to surface less obvious picks.
 
 Changing the popularity weight to anything from 0.5 to 1.5 gives the same result (45%), so the weight doesn't matter too much. The 10 sets cover rap, rage, digicore, hyperpop and art pop from 2015–2025. They lean toward well-known albums, which favors the "best-known album first" rule. 
 
@@ -128,9 +128,9 @@ In development, Vite forwards `/api/...` to the backend, so no extra setup is ne
 - **Backend on Render:** `render.yaml` is a Blueprint. Choose New → Blueprint, then enter `LASTFM_API_KEY`, `MB_USER_AGENT` and `FRONTEND_ORIGIN` (your Vercel URL).
 - **Frontend on Vercel:** set the root directory to `frontend` and set `VITE_API_URL` to the Render URL.
 
-## Known limitations
+## Limitations
 
-- **Cold starts on the free tier:** the cache is wiped when the server sleeps, so the first recommendations after a nap take a few minutes.
-- **Search** uses MusicBrainz, which doesn't rank by popularity: "carti whole lotta" works, but "whole lotta" alone may not.
+- **Cold starts:** the cache is wiped when the server sleeps, so the first recommendations after a nap take a few minutes.
+- **Search** uses MusicBrainz, which doesn't rank by popularity: "artist - album title" works, but "album title" alone may not.
 - **Covers:** archive.org, which stores them, sometimes fails to serve an image. Those albums show a placeholder.
 - **Last.fm aliases:** an old artist alias (such as "Travi$ Scott") can have its own page with a lower listener count, which makes that artist look less popular than it is.
